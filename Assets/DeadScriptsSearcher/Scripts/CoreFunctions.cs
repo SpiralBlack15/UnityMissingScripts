@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Spiral.Core
+namespace Spiral.EditorTools.DeadScriptsSearcher
 {
     /// <summary>
     /// Некоторые функции из моей основной библиотеки, которую я не буду выкладывать целиком

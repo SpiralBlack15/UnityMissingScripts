@@ -37,17 +37,48 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         // FUNCTIONALITY ==========================================================================
         //=========================================================================================
-        private readonly List<string> scene = new List<string>();
+        private Scene inspectedScene;
+        private readonly List<string> file = new List<string>();
+        public int count { get { return file.Count; } }
+        public string this[int idx]
+        {
+            get
+            {
+                if (idx >= count) return string.Empty;
+                if (idx < 0) return string.Empty;
+                return file[idx];
+            }
+            private set
+            {
+                if (idx >= count) Debug.LogWarning("IDX is out of bound");
+                if (idx < 0) Debug.LogWarning("IDX is out of bound");
+                file[idx] = value;
+            }
+        }
+
+        public void SaveScene(string newName = "")
+        {
+            string scenePath = inspectedScene.path;
+            FileInfo fileInfo = new FileInfo(scenePath);
+
+            if (string.IsNullOrEmpty(newName)) newName = fileInfo.Name;
+            if (!newName.Contains(".unity")) newName += ".unity";
+            newName = fileInfo.DirectoryName + @"\" + newName;
+            scenePath = newName;
+
+            File.WriteAllLines(scenePath, file.ToArray());
+        }
 
         public SceneFile(Scene scene)
         {
-            this.scene = GetSceneText(scene);
+            inspectedScene = scene;
+            file = GetSceneText(scene);
         }
 
         public SceneFile()
         {
-            Scene scene = SceneManager.GetActiveScene();
-            this.scene = GetSceneText(scene);
+            inspectedScene = SceneManager.GetActiveScene();
+            file = GetSceneText(inspectedScene);
         }
 
         /// <summary>
@@ -59,7 +90,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// -2, если объект находится в составе префаба</returns>
         public int IndexOfObject(ObjectID oid)
         {
-            int strIDX = scene.FindIndex(x => x.Contains($"&{oid.id}"));
+            int strIDX = file.FindIndex(x => x.Contains($"&{oid.id}"));
             if (strIDX < 0)
             {
                 if (oid.globalID.targetObjectId == 0) return -1;
@@ -77,7 +108,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <returns></returns>
         public int IndexOfComponent(ulong componentGID)
         {
-            return scene.FindIndex(x => x.Contains($"&{componentGID}"));
+            return file.FindIndex(x => x.Contains($"&{componentGID}"));
         }
 
         /// <summary>
@@ -111,19 +142,19 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             string line;
             int cursor = strIDX;
-            line = scene[cursor];
+            line = file[cursor];
             if (!IsMono(line, false, 0))
             {
                 if (debug) Debug.Log($"Script is not mono: {line}");
                 return string.Empty;
             }
 
-            int eof = scene.Count - 1;
+            int eof = file.Count - 1;
             cursor += 2;
             bool mscriptFound = false;
             while (cursor < eof)
             {
-                cursor++; line = scene[cursor];
+                cursor++; line = file[cursor];
                 if (line.Contains(unitSeparator)) { break; }
                 if (line.Contains(unitMonoScriptField)) { mscriptFound = true; break; }
             }
@@ -158,14 +189,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             string currentLine;   // читалка строки
             int cursor = fromIDX; // текущая позиция в файле
 
-            int eofIDX = scene.Count;
+            int eofIDX = file.Count;
 
             List<ulong> gids = new List<ulong>();
 
             // идём от GameObject до конца файла, не читая последнюю строчку
             while (cursor < eofIDX) 
             {
-                cursor++; currentLine = scene[cursor];
+                cursor++; currentLine = file[cursor];
 
                 // дошли до следующего разделителя - дропаемся
                 if (currentLine.Contains(unitSeparator)) { break; }
@@ -175,7 +206,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 {
                     while (cursor < eofIDX)
                     {
-                        cursor++; currentLine = scene[cursor];
+                        cursor++; currentLine = file[cursor];
                         if (!currentLine.Contains("component")) break; // вышли из списка компонент
                         ulong gid = GetFileIDFromLine(currentLine);
                         gids.Add(gid);

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Spiral.Core;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -12,6 +12,18 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public List<ObjectID> deadIDs { get; private set; } = new List<ObjectID>();
         private SceneFile sceneFile = null;
+
+        public bool sceneFileLoaded
+        {
+            get
+            {
+                if (sceneFile == null) return false;
+                if (sceneFile.count == 0) return false;
+                return true;
+            }
+        }
+
+        public bool isDirty { get { return SceneManager.GetActiveScene().isDirty; } }
 
         public void SelectDeads()
         {
@@ -54,10 +66,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             }
         }
 
-        public void SearchForDeads(bool updateDeads = true)
+        public void SearchForDeads()
         {
             // обновляемся
-            if (updateDeads) UpdateDeadList();
+            UpdateDeadList();
 
             // прогружаем файл сцены
             sceneFile = new SceneFile();
@@ -124,52 +136,15 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
     [CustomEditor(typeof(DeadScripts))]
     public class DeadScriptsEditor : Editor
     {
-        private DeadScripts deadmono = null;
-
+        private DeadScripts deadmono = null; 
+       
         private void OnEnable()
         {
             deadmono = serializedObject.targetObject as DeadScripts;
         }
 
-        public override void OnInspectorGUI()
+        private void DrawDebugMode()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("ПОИСК МЁРТВЫХ СКРИПТОВ:", EditorStyles.boldLabel);
-
-
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("Только объекты:", EditorStyles.miniBoldLabel);
-            if (GUILayout.Button("Найти и выделить"))
-            {
-                deadmono.UpdateDeadList();
-                deadmono.SelectDeads();
-            }
-            if (GUILayout.Button("Выделить"))
-            {
-                deadmono.SelectDeads();
-            }
-            EditorGUILayout.HelpBox("При нажатии на [Выделить] выполняется попытка выделить все объекты, " +
-                                    "которые ранее были опознаны как содержащие мёртвые скрипты. " +
-                                    "Проверьте, что поиск уже был выполнен, " +
-                                    "в противном случае используйте опцию [Найти и выделить];",
-                                    MessageType.Warning);
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("Проверка файла сцены:", EditorStyles.miniBoldLabel); 
-            EditorGUILayout.HelpBox("Убедитесь, что сцена была сохранена, поскольку поиск будет идти по файлу сцены.\n" +
-                                    "Для сцен с большим количеством объектов поиск может идти медленно!",
-                                    MessageType.Warning);
-            if (GUILayout.Button("Показать мёртвые GUID (с обновлением)"))
-            {
-                deadmono.SearchForDeads(true);
-            }
-            if (GUILayout.Button("Показать мёртвые GUID (без обновления)"))
-            {
-                deadmono.SearchForDeads(false);
-            }
-            EditorGUILayout.EndVertical();
-
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Режим отладки:", EditorStyles.miniBoldLabel);
             deadmono.debug = EditorGUILayout.Toggle("Включить режим отладки", deadmono.debug);
@@ -177,6 +152,62 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                                     "существенно замедлить осмотр сцен с большим количеством объектов;",
                                     MessageType.Warning);
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawSimpleMode()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Только объекты:", EditorStyles.boldLabel);
+            if (GUILayout.Button("Найти и выделить"))
+            {
+                deadmono.UpdateDeadList();
+                deadmono.SelectDeads();
+            }
+            EditorGUILayout.HelpBox("При нажатии выполняется попытка найти и выделить все " +
+                                    "объекты с битыми скриптами, находящиеся на сцене",
+                                    MessageType.None);
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawBoxSceneState()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Проверка файла сцены:", EditorStyles.boldLabel);
+            
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            EditorGUILayout.BeginHorizontal(GUI.skin.box);
+            GUIStyle styleSceneIsDirty = new GUIStyle(EditorStyles.boldLabel);
+            string sceneIsDirty = deadmono.isDirty ? "СЦЕНА БЫЛА ИЗМЕНЕНА!" : "СЦЕНА СОХРАНЕНА";
+            styleSceneIsDirty.normal.textColor = deadmono.isDirty ? new Color(0.8f, 0.0f, 0.0f) : Color.gray;
+            EditorGUILayout.LabelField(sceneIsDirty, styleSceneIsDirty);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.HelpBox("Убедитесь, что сцена была сохранена, поскольку поиск будет идти по файлу сцены.\n" +
+                                   "Для сцен с большим количеством объектов поиск может идти медленно!",
+                                   MessageType.Warning);
+            EditorGUILayout.EndVertical();
+           
+            if (GUILayout.Button("Показать мёртвые GUID"))
+            {
+                deadmono.SearchForDeads();
+            }
+            EditorGUILayout.HelpBox("Поиск идёт по файлу сцены, сопоставляя объекты с битыми скриптами " +
+                                    "с их записями в файле. Все результаты будут выведены в консоль. " +
+                                    "Обратите внимание, что из поиска исключаются скрипты, " +
+                                    "не являющиеся MonoBehaviour, а также дочерние объекты в составе префабов!",
+                                    MessageType.None);
+
+            EditorGUILayout.EndVertical();
+        }
+
+        public override void OnInspectorGUI()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("ПОИСК МЁРТВЫХ СКРИПТОВ:", EditorStyles.boldLabel);
+
+            DrawDebugMode();
+            DrawSimpleMode();
+            DrawBoxSceneState();
 
             EditorGUILayout.EndVertical();
         }
