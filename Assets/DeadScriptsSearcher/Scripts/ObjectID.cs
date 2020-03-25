@@ -111,6 +111,17 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             messageNoObject += (globalID.targetPrefabId == 0) ? SceneFile.messageSaveSceneWarning : "[Prefab]";
             Debug.Log(messageNoObject);
         }
+
+        public static void Select(List<ObjectID> oids)
+        {
+            List<GameObject> selectObjects = new List<GameObject>();
+            for (int i = 0; i < oids.Count; i++)
+            {
+                if (oids[i].gameObject == null) continue;
+                selectObjects.Add(oids[i].gameObject);
+            }
+            Selection.objects = selectObjects.ToArray();
+        }
     }
 }
 #endif
