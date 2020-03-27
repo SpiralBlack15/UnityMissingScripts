@@ -8,7 +8,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 {
     public class DeadWindow : EditorWindow
     {
-        private readonly DeadScripts deadscript = new DeadScripts();
+        private readonly DeadScripts deadscript = new DeadScripts() { debug = false };
         public Local lang = Local.RU;
 
         // LOCALIZATION ===========================================================================
@@ -99,7 +99,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             // en
             "Unique GUIDs found:"
             );
-        private readonly static LocalString strShowDeadGUIDs = new LocalString(
+        private readonly static LocalString strShowList = new LocalString(
             // ru
             "Показать/Скрыть список",
             // en
@@ -110,11 +110,16 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Объектов",
             // en
             "Objects count");
-        private readonly static LocalString strSelectOnScene = new LocalString(
+        private readonly static LocalString strSelectObjects = new LocalString(
             // ru
-            "Выбрать на сцене",
+            "Выделить все объекты с этим скриптом",
             // en
-            "Select on the scene");
+            "Select all objects with this script");
+        private readonly static LocalString strSelectObject = new LocalString(
+            // ru
+            "Выделить объект",
+            // en
+            "Select target object");
         #endregion
 
         // MENU INITIALIZATION ====================================================================
@@ -213,7 +218,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             {
                 EditorGUI.indentLevel += 1;
                 foldoutDeads = EditorGUILayout.Foldout(foldoutDeads, 
-                                                       strShowDeadGUIDs.Read(lang), 
+                                                       strShowList.Read(lang), 
                                                        true, EditorStyles.foldout);
                 EditorGUI.indentLevel -= 1;
             }
@@ -227,19 +232,58 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 for (int i = 0; i < deadscript.deadGUIDs.Count; i++)
                 {
                     DeadGUID dead = deadscript.deadGUIDs[i];
-
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    EditorGUILayout.LabelField($"GUID #{i}", EditorStyles.miniBoldLabel);
-                    EditorGUILayout.SelectableLabel($"{dead.guid}", EditorStyles.label);
-                    EditorGUILayout.LabelField($"{strDeadObjectsCount.Read(lang)}: {dead.oids.Count}", 
-                                              EditorStyles.miniBoldLabel);
-                    if (GUILayout.Button(strSelectOnScene.Read(lang)))
-                    {
-                        ObjectID.Select(dead.oids);
-                    }
-                    EditorGUILayout.EndVertical();
+                    DrawDeadGUIDEntry(dead);
                 }
             }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawDeadGUIDEntry(DeadGUID dead)
+        {
+            GUI.color = new Color(0.5f, 0.5f, 0.5f);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            GUI.color = defaultColor;
+
+            EditorGUILayout.SelectableLabel($"GUID: {dead.guid}", GUILayout.MinWidth(250));
+
+            string strDeadCount = $"{strDeadObjectsCount.Read(lang)}: {dead.oids.Count}";
+
+            dead.showInfo = EditorGUILayout.Foldout(dead.showInfo, strDeadCount);
+            if (dead.showInfo)
+            {
+                for (int i = 0; i < dead.gids.Count; i++)
+                {
+                    var dgid = dead.gids[i];
+                    var dgidID = dgid.gid;
+
+                    string strGID = $"{dgidID}";
+                    string strButtonName = $"#{i} MonoBehaviour ID: {strGID}";
+                    if (EditorGUILayout.DropdownButton(new GUIContent(strButtonName), FocusType.Passive))
+                    {
+                        dgid.showInfo = !dgid.showInfo;
+                    }
+                    if (dgid.showInfo)
+                    {
+                        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                        EditorGUILayout.SelectableLabel(strGID);
+                        if (GUILayout.Button(strSelectObject.Read(lang)))
+                        {
+                            Selection.objects = new Object[1] { dead.oids[i].gameObject }; 
+                        }
+                        GUI.enabled = false;
+                        EditorGUILayout.TextArea(dgid.entry);
+                        GUI.enabled = true;
+                        EditorGUILayout.Space();
+                        EditorGUILayout.EndVertical();
+                    }
+                }
+            }
+
+            if (GUILayout.Button(strSelectObjects.Read(lang)))
+            {
+                ObjectID.Select(dead.oids);
+            }
+
             EditorGUILayout.EndVertical();
         }
 
@@ -248,8 +292,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         // Editor Window's Mono
         //=========================================================================================
         Vector2 scrollPos;
+        Color defaultColor = Color.white;
         private void OnGUI()
         {
+            defaultColor = GUI.color;
             switch (lang)
             {
                 case Local.RU:
@@ -275,6 +321,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             EditorGUILayout.EndScrollView();
 
             EditorGUILayout.EndVertical();
+            GUI.color = defaultColor;
         }
     }
 }

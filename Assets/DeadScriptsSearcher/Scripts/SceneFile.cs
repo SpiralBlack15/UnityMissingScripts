@@ -111,6 +111,24 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             return file.FindIndex(x => x.Contains($"&{componentGID}"));
         }
 
+        public List<string> ComponentInfo(ulong componentGID)
+        {
+            int cursor = IndexOfComponent(componentGID);
+            if (cursor < 0) return null;
+            List<string> output = new List<string>(); 
+            string currentLine = file[cursor];
+            output.Add(currentLine);
+            cursor++;
+            while (cursor < count)
+            {
+                currentLine = file[cursor];
+                if (currentLine.Contains(unitSeparator)) { break; }
+                output.Add(currentLine);
+                cursor++;
+            }
+            return output;
+        }
+
         /// <summary>
         /// Выуживает все GID компонентов с объекта
         /// </summary>
@@ -149,7 +167,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 return string.Empty;
             }
 
-            int eof = file.Count - 1;
+            int eof = count - 1;
             cursor += 2;
             bool mscriptFound = false;
             while (cursor < eof)
@@ -189,7 +207,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             string currentLine;   // читалка строки
             int cursor = fromIDX; // текущая позиция в файле
 
-            int eofIDX = file.Count;
+            int eofIDX = count;
 
             List<ulong> gids = new List<ulong>();
 

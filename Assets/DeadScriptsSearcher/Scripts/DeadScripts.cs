@@ -6,22 +6,43 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
-    public struct DeadGUID
+    public class DeadGID
     {
+        public ulong gid;
+        public bool showInfo;
+        public string entry;
+    }
+
+    public class DeadGUID
+    {
+        /// <summary>
+        /// GUID, ассоциированный со скриптом
+        /// </summary>
         public string guid;
+
+        /// <summary>
+        /// Все мёртвые объекты со скриптом этого вида
+        /// </summary>
         public List<ObjectID> oids;
+
+        /// <summary>
+        /// Все MonoBehaviour со скриптом этого вида
+        /// </summary>
+        public List<DeadGID> gids;
+
+
+        // EDITOR WINDOW STUFF
+        public bool showInfo;
     }
 
     public class DeadScripts
     {
         public bool debug = true;
-
         public List<ObjectID> deadOIDs  { get; private set; } = new List<ObjectID>();
         public List<DeadGUID> deadGUIDs { get; private set; } = new List<DeadGUID>();
-
-
         private SceneFile sceneFile = null;
 
+        // PROPERTIES -----------------------------------------------------------------------------
         public bool sceneFileLoaded
         {
             get
@@ -34,6 +55,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public bool isDirty { get { return SceneManager.GetActiveScene().isDirty; } }
 
+        // FUNCTIONALITY --------------------------------------------------------------------------
         public void SelectDeads()
         {
             ObjectID.Select(deadOIDs);
@@ -114,20 +136,40 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                     if (string.IsNullOrEmpty(guid)) // GUID не был найден
                         continue;
 
+                    // GUID найден, создаём учётку для скрипта
+                    DeadGID deadGID = new DeadGID
+                    {
+                        gid = gid,
+                        showInfo = false
+                    };
+                    List<string> entryList = sceneFile.ComponentInfo(gid);
+                    string entry = "";
+                    for (int e = 0; e < entryList.Count; e++)
+                    {
+                        entry += entryList[e];
+                        if (e != entryList.Count - 1) entry += "\n";
+                    }
+                    deadGID.entry = entry;
+
+                    // проверяем, есть GUID в списке или нет
                     int guidIDX = deadGUIDs.FindIndex(x => x.guid == guid);
-                    if (guidIDX >= 0)
+                    if (guidIDX >= 0) // добавляем новый объект и новый компонент к уже существующему GUID
                     {
                         deadGUIDs[guidIDX].oids.Add(oid);
+                        deadGUIDs[guidIDX].gids.Add(deadGID);
                     }
-                    else
+                    else // создаём новую GUID-учёткуы
                     {
                         DeadGUID deadGUID = new DeadGUID
                         {
                             guid = guid,
-                            oids = new List<ObjectID>()
+                            oids = new List<ObjectID>(),
+                            gids = new List<DeadGID>(),
+                            showInfo = false,
                         };
-                        deadGUID.oids.Add(oid);
                         deadGUIDs.Add(deadGUID);
+                        deadGUID.oids.Add(oid);
+                        deadGUID.gids.Add(deadGID);
                     }
                 }
             }
