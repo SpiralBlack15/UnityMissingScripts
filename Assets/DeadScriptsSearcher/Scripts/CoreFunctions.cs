@@ -10,7 +10,19 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
     /// </summary>
     public static class CoreFunctions
     {
-        public static List<T> Array2List<T>(this T[] ts) where T : UnityEngine.Object
+        public static string List2String(this List<string> entry)
+        {
+            string output = "";
+            int count = entry.Count;
+            for (int e = 0; e < count; e++)
+            {
+                output += entry[e];
+                if (e != count - 1) output += "\n";
+            }
+            return output;
+        }
+
+        public static List<T> Array2List<T>(this T[] ts) where T : Object
         {
             List<T> output = new List<T>();
             for (int i = 0; i < ts.Length; i++) { output.Add(ts[i]); }

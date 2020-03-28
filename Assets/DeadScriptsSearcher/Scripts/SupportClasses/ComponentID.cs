@@ -19,7 +19,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// Global Object ID компонента
         /// </summary>
-        public GlobalObjectId gid { get; }
+        public GlobalObjectId goid { get; }
 
         /// <summary>
         /// Тип компонента
@@ -44,12 +44,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// ID компонента
         /// </summary>
-        public ulong id { get { return gid.targetObjectId; } }
+        public ulong cid { get { return goid.targetObjectId; } }
 
         public ComponentID(Component comp)
         {
             component = comp;
-            gid = GlobalObjectId.GetGlobalObjectIdSlow(comp);
+            goid = GlobalObjectId.GetGlobalObjectIdSlow(comp);
 
             // пациент скорее жив, чем мёртв?
             if (alive)

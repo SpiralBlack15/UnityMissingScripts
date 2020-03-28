@@ -66,7 +66,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
                 if (cid.alive)
                 {
-                    ulong id = cid.id;
+                    ulong id = cid.cid;
                     liveIDs.Add(id); // сохраняем живой ID
                 }
                 else
@@ -80,10 +80,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
                 if (dbg)
                 {
-                    string dbgObjID = (cid.id == 0) ?
-                                       $"<color=red>{cid.id}</color>" :
+                    string dbgObjID = (cid.cid == 0) ?
+                                       $"<color=red>{cid.cid}</color>" :
                                     
-                                       $"<color=blue>{cid.id}</color>";
+                                       $"<color=blue>{cid.cid}</color>";
                     string dbgScriptType;
                     string dbgConclusion;
 

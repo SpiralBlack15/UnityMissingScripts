@@ -129,6 +129,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             return output;
         }
 
+        
+
         /// <summary>
         /// Выуживает все GID компонентов с объекта
         /// </summary>

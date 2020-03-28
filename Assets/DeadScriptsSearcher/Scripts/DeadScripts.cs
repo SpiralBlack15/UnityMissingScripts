@@ -1,45 +1,19 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
 
 #if UNITY_EDITOR
 using UnityEditor;
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
-    public class DeadGID
-    {
-        public ulong gid;
-        public bool showInfo;
-        public string entry;
-    }
-
-    public class DeadGUID
-    {
-        /// <summary>
-        /// GUID, ассоциированный со скриптом
-        /// </summary>
-        public string guid;
-
-        /// <summary>
-        /// Все мёртвые объекты со скриптом этого вида
-        /// </summary>
-        public List<ObjectID> oids;
-
-        /// <summary>
-        /// Все MonoBehaviour со скриптом этого вида
-        /// </summary>
-        public List<DeadGID> gids;
-
-
-        // EDITOR WINDOW STUFF
-        public bool showInfo;
-    }
-
     public class DeadScripts
     {
+        public static DeadScripts instance { get; } = new DeadScripts() { debug = false };
+
         public bool debug = true;
         public List<ObjectID> deadOIDs  { get; private set; } = new List<ObjectID>();
-        public List<DeadGUID> deadGUIDs { get; private set; } = new List<DeadGUID>();
+        public List<ScriptGUID> deadGUIDs { get; private set; } = new List<ScriptGUID>();
         private SceneFile sceneFile = null;
 
         // PROPERTIES -----------------------------------------------------------------------------
@@ -82,7 +56,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 // если на объекте есть мёртвые скрипты - добавляем ObjectID в список
                 ObjectID objectID = new ObjectID(go, debug);
                 deadOIDs.Add(objectID);
+
+                EditorUtility.DisplayProgressBar(strProgressBar_SearchDeadObject,
+                                                 strProgressBar_SearchingScene, 
+                                                 i * 1f / count);
             }
+            EditorUtility.ClearProgressBar();
 
             // если не найдены
             if (deadOIDs.Count == 0)
@@ -100,9 +79,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             sceneFile = new SceneFile();
 
             // шерстим гиды мёртвых
-            deadGUIDs = new List<DeadGUID>();
-            for (int i = 0; i < deadOIDs.Count; i++)
+            deadGUIDs = new List<ScriptGUID>();
+            int count = deadOIDs.Count;
+            for (int i = 0; i < count; i++)
             {
+                EditorUtility.DisplayProgressBar(strProgressBar_SearchingSceneFile,
+                                                 strProgressBar_InspectedObject + $"{i} / {count}", 
+                                                 i * 1f / count);
+
                 // какой объект мы сейчас инспектируем
                 ObjectID oid = deadOIDs[i]; 
 
@@ -137,19 +121,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                         continue;
 
                     // GUID найден, создаём учётку для скрипта
-                    DeadGID deadGID = new DeadGID
-                    {
-                        gid = gid,
-                        showInfo = false
-                    };
-                    List<string> entryList = sceneFile.ComponentInfo(gid);
-                    string entry = "";
-                    for (int e = 0; e < entryList.Count; e++)
-                    {
-                        entry += entryList[e];
-                        if (e != entryList.Count - 1) entry += "\n";
-                    }
-                    deadGID.entry = entry;
+                    ScriptInstanceGID deadGID = new ScriptInstanceGID(gid, sceneFile);
 
                     // проверяем, есть GUID в списке или нет
                     int guidIDX = deadGUIDs.FindIndex(x => x.guid == guid);
@@ -160,19 +132,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                     }
                     else // создаём новую GUID-учёткуы
                     {
-                        DeadGUID deadGUID = new DeadGUID
-                        {
-                            guid = guid,
-                            oids = new List<ObjectID>(),
-                            gids = new List<DeadGID>(),
-                            showInfo = false,
-                        };
+                        ScriptGUID deadGUID = new ScriptGUID(guid, true);
                         deadGUIDs.Add(deadGUID);
                         deadGUID.oids.Add(oid);
                         deadGUID.gids.Add(deadGID);
                     }
                 }
             }
+            EditorUtility.ClearProgressBar();
 
             if (debug)
             {
