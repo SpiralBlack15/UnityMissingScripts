@@ -56,25 +56,17 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "LANGUAGE:");
 
         // DEAD SCRIPT SEARCHER EDITOR WINDOW -----------------------------------------------------
-        public readonly static LocalString strEditorWindow_DeadScriptSearcher = new LocalString(
+        public readonly static LocalString strDeadScriptSearcher_Caption = new LocalString(
             // ru
             "Поиск мёртвых скриптов",
             // en
             "Dead Scripts Searcher");
-
-        // MONO VIEW EDITOR WINDOW ----------------------------------------------------------------
-        public readonly static LocalString strEditorWindow_MonoView = new LocalString(
-            // ru
-            "Ревизор",
-            // en
-            "Auditor");
-
-        public readonly static LocalString strDebugMode = new LocalString(
+        public readonly static LocalString strDeadScriptSearcher_DebugMode = new LocalString(
             // ru
             "Режим отладки",
             // en
             "Debug mode");
-        public readonly static LocalString strDebugModeHelp = new LocalString(
+        public readonly static LocalString strDeadScriptSearcher_DebugModeHelp = new LocalString(
             // ru
             "Режим отладки будет выводить в консоль все действия, что может " +
             "существенно замедлить осмотр сцен с большим количеством объектов",
@@ -82,6 +74,31 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Debug mode will output all actions to the console. This can " +
             "significantly slow down the checkup of scenes " +
             "with a large number of objects");
+
+        // MONO VIEW EDITOR WINDOW ----------------------------------------------------------------
+        public readonly static LocalString strMonoView_Caption = new LocalString(
+            // ru
+            "Ревизор",
+            // en
+            "Auditor"); 
+        public readonly static LocalString strMonoView_SelectObject = new LocalString(
+            // ru
+            "Выделите объект(ы) в инспекторе сцены, чтобы посмотреть данные",
+            // en
+            "Select object(s) in scene inspector to view its/their data");
+        public readonly static LocalString strMonoView_ShowObjectInfo = new LocalString(
+            // ru
+            "Развернуть",
+            // en
+            "Show");
+        public readonly static LocalString strMonoView_HideObjectInfo = new LocalString(
+            // ru
+            "Свернуть",
+            // en
+            "Hide");
+
+
+
         public readonly static LocalString strObjectsOnly = new LocalString(
             // ru
             "Только объекты",
@@ -193,22 +210,22 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Inspected object: ");
 
         // DEBUG AND EXCEPTION MESSAGES -----------------------------------------------------------
-        public readonly static LocalString str_DebugGUIDNotFound = new LocalString(
+        public readonly static LocalString strDebug_GUIDNotFound = new LocalString(
             // ru
             "Строка не содержит GUID. Проверьте строку и/или файл сцены",
             // en
             "Input string does not contain any GUID. Check the string and/or scene file");
-        public readonly static LocalString str_DebugSaveSceneWarning = new LocalString(
+        public readonly static LocalString strDebug_SaveSceneWarning = new LocalString(
             // ru
             "Что-то пошло не так. Файл сцены повреждён или не сохранен. Сохраните сцену и повторите попытку",
             // en
             "Somethings go wrong. Scene file may be corrupted or outdated. Please, save your Scene and try again");
-        public readonly static LocalString str_ObjectIDNotFound = new LocalString(
+        public readonly static LocalString strDebug_ObjectIDNotFound = new LocalString(
             // ru
             "не найден в файле сцены",
             // en
             "not found in the Scene file");
-        public readonly static LocalString str_DeadScriptAtThePosition = new LocalString(
+        public readonly static LocalString strDebug_DeadScriptAtThePosition = new LocalString(
            // ru
            "мёртвый скрипт обнаружен на позиции",
            // en

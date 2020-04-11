@@ -42,6 +42,11 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public int missingScriptsCount { get; } = 0;
 
         /// <summary>
+        /// Флаг для EditorWindow
+        /// </summary>
+        public bool showInfo { get; set; } = false;
+
+        /// <summary>
         /// Получить информацию об этом объекте, чтобы найти его в файле сцен
         /// </summary>
         /// <param name="obj">Объект</param>
@@ -72,7 +77,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 {
                     if (debugMode)
                     {
-                        Debug.Log($"<color=red><b>Object</b> <i>{obj}</i>: {str_DeadScriptAtThePosition} #{i}</color>");
+                        Debug.Log($"<color=red><b>Object</b> <i>{obj}</i>: {strDebug_DeadScriptAtThePosition} #{i}</color>");
                     }
                     missingScriptsCount++;
                 }
@@ -106,8 +111,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// </summary>
         public void DebugObjectNotFound()
         {
-            string messageNoObject = $"<color=brown>Object ID <b>{id}</b> {str_ObjectIDNotFound};</color> ";
-            messageNoObject += (globalID.targetPrefabId == 0) ? $"<color=red>{str_ObjectIDNotFound}</color>" : "[Prefab]";
+            string messageNoObject = $"<color=brown>Object ID <b>{id}</b> {strDebug_ObjectIDNotFound};</color> ";
+            messageNoObject += (globalID.targetPrefabId == 0) ? $"<color=red>{strDebug_ObjectIDNotFound}</color>" : "[Prefab]";
             Debug.Log(messageNoObject);
         }
 

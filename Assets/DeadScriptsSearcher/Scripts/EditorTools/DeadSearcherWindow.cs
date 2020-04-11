@@ -7,10 +7,8 @@ using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
 using UnityEditor;
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
-    public class DeadWindow : EditorWindow
+    public class DeadSearcherWindow : EditorWindow
     {
-        private DeadScripts deadscript { get { return DeadScripts.instance; } }
-
         private Vector2 scrollPos;
         private Color defaultColor = Color.white;
 
@@ -20,19 +18,18 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         [MenuItem("Spiral Tools/Dead Scripts Searcher")]
         public static void Init()
         {
-            DeadWindow window = (DeadWindow)GetWindow(typeof(DeadWindow));
+            DeadSearcherWindow window = (DeadSearcherWindow)GetWindow(typeof(DeadSearcherWindow));
             window.Show();
         }
 
         private void OnGUI()
         {
             defaultColor = GUI.color;
-            titleContent.text = strEditorWindow_DeadScriptSearcher;
+            titleContent.text = strDeadScriptSearcher_Caption;
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos,
-                                                        GUILayout.Height(position.height));
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(position.height));
+            
             DrawLanguageSelect();
-
             DrawDebugMode();
             DrawSimpleMode();
             DrawBoxSceneState();
@@ -48,10 +45,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         private void DrawDebugMode()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            deadscript.isDebugMode = EditorGUILayout.Toggle(strDebugMode, deadscript.isDebugMode);
-            if (deadscript.isDebugMode)
+            DeadScripts.isDebugMode = EditorGUILayout.Toggle(strDeadScriptSearcher_DebugMode, DeadScripts.isDebugMode);
+            if (DeadScripts.isDebugMode)
             {
-                EditorGUILayout.HelpBox(strDebugModeHelp, MessageType.Warning);
+                EditorGUILayout.HelpBox(strDeadScriptSearcher_DebugModeHelp, MessageType.Warning);
             }
             EditorGUILayout.EndVertical();
         }
@@ -62,8 +59,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             EditorGUILayout.LabelField(strObjectsOnly, EditorStyles.boldLabel);
             if (GUILayout.Button(strObjectsOnlyButton))
             {
-                deadscript.UpdateDeadList();
-                deadscript.SelectDeads();
+                DeadScripts.UpdateDeadList();
+                DeadScripts.SelectDeads();
             }
             EditorGUILayout.EndVertical();
         }
@@ -78,10 +75,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             EditorGUILayout.BeginHorizontal(GUI.skin.box);
             GUIStyle styleSceneIsDirty = new GUIStyle(EditorStyles.boldLabel);
-            string sceneIsDirty = deadscript.isDirty ? 
+            string sceneIsDirty = DeadScripts.isDirty ? 
                                   strSceneWasChanged : 
                                   strSceneClear;
-            styleSceneIsDirty.normal.textColor = deadscript.isDirty ? new Color(0.8f, 0.0f, 0.0f) : Color.gray;
+            styleSceneIsDirty.normal.textColor = DeadScripts.isDirty ? new Color(0.8f, 0.0f, 0.0f) : Color.gray;
             EditorGUILayout.LabelField(sceneIsDirty, styleSceneIsDirty);
             EditorGUILayout.EndHorizontal();
 
@@ -102,8 +99,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             if (GUILayout.Button(strFindDeadGUIDs))
             {
-                deadscript.SearchForDeads();
-                if (deadscript.deadGUIDs.Count > 0) foldoutDeads = true;
+                DeadScripts.SearchForDeads();
+                if (DeadScripts.deadGUIDs.Count > 0) foldoutDeads = true;
             }
             ShowDeadGUIDs();
 
@@ -115,10 +112,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         {
             GUILayoutOption labelOption = GUILayout.Height(20);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField(strFoundGUIDs + $"{deadscript.deadGUIDs.Count}", 
+            EditorGUILayout.LabelField(strFoundGUIDs + $"{DeadScripts.deadGUIDs.Count}", 
                                        EditorStyles.miniBoldLabel, labelOption);
 
-            if (deadscript.deadGUIDs.Count != 0)
+            if (DeadScripts.deadGUIDs.Count != 0)
             {
                 EditorGUI.indentLevel += 1;
                 foldoutDeads = EditorGUILayout.Foldout(foldoutDeads, 
@@ -133,9 +130,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             if (foldoutDeads)
             {
-                for (int i = 0; i < deadscript.deadGUIDs.Count; i++)
+                for (int i = 0; i < DeadScripts.deadGUIDs.Count; i++)
                 {
-                    ScriptGUID dead = deadscript.deadGUIDs[i];
+                    ScriptGUID dead = DeadScripts.deadGUIDs[i];
                     DrawDeadGUIDEntry(dead);
                 }
             }

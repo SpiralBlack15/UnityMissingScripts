@@ -268,7 +268,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <returns>GUID mono script'a строкой</returns>
         public static string GetGUIDFromLine(string line)
         {
-            if (!line.Contains("guid")) throw new FormatException(str_DebugGUIDNotFound);
+            if (!line.Contains("guid")) throw new FormatException(strDebug_GUIDNotFound);
 
             var strsplit = line.Split(new string[] { "guid:" }, StringSplitOptions.None);
             strsplit = strsplit[1].Split(',');
@@ -317,7 +317,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         {
             try
             {
-                if (!line.Contains("fileID:")) throw new FormatException(str_DebugGUIDNotFound);
+                if (!line.Contains("fileID:")) throw new FormatException(strDebug_GUIDNotFound);
 
                 var strsplit = line.Split(new string[] { "fileID:" }, StringSplitOptions.None);
                 strsplit = strsplit[1].Split(splitAfter);
