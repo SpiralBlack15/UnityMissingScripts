@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
     /// <summary>
-    /// Идентификацинный номер компонента в файле сцены
+    /// Данные о конкретно взятом экземпляре компонента в сцене
     /// </summary>
     public class ComponentID
     {
@@ -22,12 +22,17 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public GlobalObjectId goid { get; }
 
         /// <summary>
-        /// Тип компонента
+        /// Тип компонента (то же, что и GetType())
         /// </summary>
         public Type type { get; } = null;
 
         /// <summary>
-        /// Сериализованное свойство, соотнесённое с компонентом
+        /// Соотнесённое с компонентом сериализованное свойство.
+        /// Это поле может быть равно null для части живых скриптов,
+        /// поскольку у них отсутствует поле m_Script (трансформы, камеры и т.п.).
+        /// Чтобы определить, живой компонент или нет, достаточно ориентироваться на component != null:
+        /// учётки мёртвых компонентов будут выглядеть одинаково в любом случае,
+        /// а для живых они выполняют исключительно информационную функцию.
         /// </summary>
         public SerializedProperty monoScript { get; } = null;
 
@@ -37,12 +42,13 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public int metadataToken { get; } = 0;
 
         /// <summary>
-        /// Компонент живой (т.е. не является missing script)
+        /// Компонент живой (не является missing script)
         /// </summary>
         public bool alive { get { return component != null; } }
 
         /// <summary>
-        /// ID компонента
+        /// GID компонента (позволяет однозначно идентифицировать экземпляр 
+        /// компонента в файле сцены)
         /// </summary>
         public ulong cid { get { return goid.targetObjectId; } }
 
@@ -54,15 +60,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             // пациент скорее жив, чем мёртв?
             if (alive)
             {
-                // уточняем тип живого скрипта
                 type = component.GetType();
                 metadataToken = type.MetadataToken;
-
-                // проверяем, что это MonoBehaviour, ищем у него поле m_Script
                 var serComp = new SerializedObject(comp);
                 monoScript = serComp.FindProperty(SceneFile.unitMonoScriptField);
             }
-            else // пациент однозначно мёртв, мы нашли битый скрипт
+            else // пациент мёртв, мы нашли битый скрипт
             {
                 type = null;
                 metadataToken = -1;
@@ -71,10 +74,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         /// <summary>
-        /// Получить список 
+        /// Получить список компонент на объекте
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
         public static List<ComponentID> GetComponentIDs(GameObject obj)
         {
             Component[] components = obj.GetComponents<Component>();

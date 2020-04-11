@@ -4,10 +4,6 @@ using UnityEngine.SceneManagement;
 
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
-    /// <summary>
-    /// Некоторые функции из моей основной библиотеки, которую я не буду выкладывать целиком
-    /// Нужны здесь исключительно чтобы работало всё остальное
-    /// </summary>
     public static class CoreFunctions
     {
         public static string List2String(this List<string> entry)
@@ -68,17 +64,13 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// Возвращает все дочерние трансформы
         /// </summary>
-        /// <param name="transform">Transform</param>
-        /// <returns></returns>
+        /// <param name="transform">Трансформ, дочерние трансформы которого собираются</param>
         public static List<Transform> CollectChildTransforms(this Transform transform)
         {
             List<Transform> output = new List<Transform>();
-
-            // собираем детишек первого уровня, дальше будем идти по ним
             output.AddRange(transform.CollectChildFirstLevelTransforms());
-
-            // обращаю внимание, что output.Count УВЕЛИЧИВАЕТСЯ в течение цикла до тех пор, пока не будут взяты все
-            // дочерние трансформы всех уровней
+            // обращаю внимание, что output.Count УВЕЛИЧИВАЕТСЯ в течение цикла,
+            // до тех пор, пока не будут взяты все дочерние трансформы всех уровней
             for (int i = 0; i < output.Count; i++)
             {
                 Transform child = output[i];
@@ -89,6 +81,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             return output;
         }
 
+        /// <summary>
+        /// Собирает все трансформы со сцены
+        /// </summary>
         public static List<Transform> CollectScene()
         {
             var output = new List<Transform>();

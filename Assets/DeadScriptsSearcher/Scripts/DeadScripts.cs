@@ -9,14 +9,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 {
     public class DeadScripts
     {
-        public static DeadScripts instance { get; } = new DeadScripts() { debug = false };
+        public bool isDebugMode = true;
 
-        public bool debug = true;
+        public static DeadScripts instance { get; } = new DeadScripts() { isDebugMode = false };
         public List<ObjectID> deadOIDs  { get; private set; } = new List<ObjectID>();
         public List<ScriptGUID> deadGUIDs { get; private set; } = new List<ScriptGUID>();
-        private SceneFile sceneFile = null;
 
-        // PROPERTIES -----------------------------------------------------------------------------
         public bool sceneFileLoaded
         {
             get
@@ -29,6 +27,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public bool isDirty { get { return SceneManager.GetActiveScene().isDirty; } }
 
+        private SceneFile sceneFile = null;
+
         // FUNCTIONALITY --------------------------------------------------------------------------
         public void SelectDeads()
         {
@@ -37,33 +37,26 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public void UpdateDeadList()
         {
-            // Собираем все объекты на сцене
             var objects = CoreFunctions.CollectScene().Transforms2GameObjects();
             int count = objects.Count;
 
-            // Чистим лист объектов с мёртвыми скриптами
             if (deadOIDs == null) deadOIDs = new List<ObjectID>();
             else if (deadOIDs.Count != 0) deadOIDs.Clear();
 
-            // Идём по списку
             for (int i = 0; i < count; i++)
             {
                 GameObject go = objects[i];
                 int missings = GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(go);
-                
                 if (missings == 0) continue;
 
-                // если на объекте есть мёртвые скрипты - добавляем ObjectID в список
-                ObjectID objectID = new ObjectID(go, debug);
+                ObjectID objectID = new ObjectID(go, isDebugMode);
                 deadOIDs.Add(objectID);
-
                 EditorUtility.DisplayProgressBar(strProgressBar_SearchDeadObject,
                                                  strProgressBar_SearchingScene, 
                                                  i * 1f / count);
             }
             EditorUtility.ClearProgressBar();
 
-            // если не найдены
             if (deadOIDs.Count == 0)
             {
                 Debug.Log($"<color=green>Everything is okay :)</color>");
@@ -72,65 +65,74 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public void SearchForDeads()
         {
-            // обновляемся
             UpdateDeadList();
-
-            // прогружаем файл сцены
             sceneFile = new SceneFile();
-
-            // шерстим гиды мёртвых
             deadGUIDs = new List<ScriptGUID>();
-            int count = deadOIDs.Count;
+
+            int count = deadOIDs.Count; // список deadOIDs сформирован функцией UpdateDeadList()
             for (int i = 0; i < count; i++)
             {
                 EditorUtility.DisplayProgressBar(strProgressBar_SearchingSceneFile,
                                                  strProgressBar_InspectedObject + $"{i} / {count}", 
                                                  i * 1f / count);
 
-                // какой объект мы сейчас инспектируем
-                ObjectID oid = deadOIDs[i]; 
+                // инспектируемая учётка объекта
+                ObjectID oid = deadOIDs[i];
 
-                // пытаемся взять список компонентных GID'ов для данного объекта
-                List<ulong> componentGIDs = sceneFile.GetCGIDs(oid, debug);
+                // идентфикаторы компонентов берутся напрямую из файла сцены
+                // ulong gid компонента (равно как и объекта) - это уникальный идентификатор, позволяющий
+                // найти компонент в файле сцены; два одинаковых компонента будут иметь одинаковый GUID,
+                // но разный gid!
+                List<ulong> componentGIDs = sceneFile.GetCGIDs(oid, isDebugMode);
 
-                // компонентные гиды не были взяты (объект в префабе или сцена была изменена)
-                if (componentGIDs == null)
+                // если компонентные гиды не были взяты (объект находится в префабе или сцена была изменена)
+                // если объект находится в префабе, его записи нет в файле сцены.
+                if (componentGIDs == null) 
                 {
-                    if (debug) oid.DebugObjectNotFound();
+                    if (isDebugMode) oid.DebugObjectNotFound();
                     continue;
                 }
 
-                // список гидов равен нулю
-                if (componentGIDs.Count == 0)
+                // маловероятная ситуация, на практике у любого объекта есть как минимум один компонент
+                // (это Transform); если мы падаем в этот случай, у нас, возможно, какие-то проблемы
+                // с чтением файла сцены.
+                if (componentGIDs.Count == 0) 
                 {
-                    if (debug) Debug.Log($"GIDs count of {oid.gameObject.name} is 0");
+                    if (isDebugMode) Debug.Log($"GIDs count of {oid.gameObject.name} is 0");
                     continue;
                 }
 
-                // идём по всем найденным гидам
                 for (int g = 0; g < componentGIDs.Count; g++)
                 {
                     ulong gid = componentGIDs[g];
 
-                    if (oid.liveIDs.Contains(gid)) // пропускаем живчиков
-                        continue; 
+                    // проверяет, что компонент в списке живых, и его рассматривать нет смысла
+                    if (oid.liveIDs.Contains(gid)) continue; 
 
-                    string guid = sceneFile.GetGUID(gid, debug);
+                    string guid = sceneFile.GetGUID(gid, isDebugMode);
 
-                    if (string.IsNullOrEmpty(guid)) // GUID не был найден
+                    // GUID не был найден в файле сцены. Это может произойти, если вы не сохранили сцену после изменений,
+                    // если файл сцены повреждён. Также это происходит для скриптов, не имеющих поля m_Script в файле 
+                    // сцены. Это скрипты вроде скрипта камеры, трансформа и т.п.
+                    if (string.IsNullOrEmpty(guid))
+                    {
+                        if (isDebugMode) Debug.Log($"Script GID: {gid}; GUID not found");
                         continue;
+                    }
 
-                    // GUID найден, создаём учётку для скрипта
+                    // Если GUID найден, создаём учётку для скрипта
                     ScriptInstanceGID deadGID = new ScriptInstanceGID(gid, sceneFile);
 
-                    // проверяем, есть GUID в списке или нет
+                    // проверяем, есть ли уже учётка с таким GUID или нет 
+                    // не путайте GID- и GUID- учётки: первая описывает конкретный экземпляр скрипта,
+                    // а вторая - группу скриптов, имеющих одинаковый GUID
                     int guidIDX = deadGUIDs.FindIndex(x => x.guid == guid);
-                    if (guidIDX >= 0) // добавляем новый объект и новый компонент к уже существующему GUID
+                    if (guidIDX >= 0) // добавляем мёртвый компонент и его объект к уже существующей учётке
                     {
                         deadGUIDs[guidIDX].oids.Add(oid);
                         deadGUIDs[guidIDX].gids.Add(deadGID);
                     }
-                    else // создаём новую GUID-учёткуы
+                    else // создаём новую GUID-учётку
                     {
                         ScriptGUID deadGUID = new ScriptGUID(guid, true);
                         deadGUIDs.Add(deadGUID);
@@ -140,8 +142,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 }
             }
             EditorUtility.ClearProgressBar();
-
-            if (debug)
+            if (isDebugMode)
             {
                 for (int i = 0; i < deadGUIDs.Count; i++)
                 {

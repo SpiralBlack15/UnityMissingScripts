@@ -48,8 +48,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         private void DrawDebugMode()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            deadscript.debug = EditorGUILayout.Toggle(strDebugMode, deadscript.debug);
-            if (deadscript.debug)
+            deadscript.isDebugMode = EditorGUILayout.Toggle(strDebugMode, deadscript.isDebugMode);
+            if (deadscript.isDebugMode)
             {
                 EditorGUILayout.HelpBox(strDebugModeHelp, MessageType.Warning);
             }

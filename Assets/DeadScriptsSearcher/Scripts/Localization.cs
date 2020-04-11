@@ -1,9 +1,9 @@
-﻿#if UNITY_EDITOR
+﻿using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
 #endif
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
-    // SUPER EASY LOCALIZATION TIME
     public enum Language { RU, ENG }
     public struct LocalString
     {
@@ -12,17 +12,17 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public LocalString(string RU, string ENG)
         {
-            this.RU = RU;
+            this.RU  = RU;
             this.ENG = ENG;
         }
         private string Read(Language local)
         {
             switch (local)
             {
-                case Language.RU: return RU;
+                case Language.RU:  return RU;
                 case Language.ENG: return ENG;
 
-                default: return ENG;
+                default: Debug.LogWarning($"Language {local} not found"); return ENG;
             }
         }
 
@@ -55,11 +55,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             // en
             "LANGUAGE:");
 
+        // DEAD SCRIPT SEARCHER EDITOR WINDOW -----------------------------------------------------
         public readonly static LocalString strEditorWindow_DeadScriptSearcher = new LocalString(
             // ru
             "Поиск мёртвых скриптов",
             // en
             "Dead Scripts Searcher");
+
+        // MONO VIEW EDITOR WINDOW ----------------------------------------------------------------
         public readonly static LocalString strEditorWindow_MonoView = new LocalString(
             // ru
             "Ревизор",
@@ -167,6 +170,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             // en
             "Select target object");
 
+        // PROGRESS BAR MESSAGES ------------------------------------------------------------------
         public readonly static LocalString strProgressBar_SearchDeadObject = new LocalString(
             // ru
             "Поиск мёртвых объектов на сцене",
@@ -187,7 +191,29 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Проверяем объект: ",
             // en
             "Inspected object: ");
-#endregion
+
+        // DEBUG AND EXCEPTION MESSAGES -----------------------------------------------------------
+        public readonly static LocalString str_DebugGUIDNotFound = new LocalString(
+            // ru
+            "Строка не содержит GUID. Проверьте строку и/или файл сцены",
+            // en
+            "Input string does not contain any GUID. Check the string and/or scene file");
+        public readonly static LocalString str_DebugSaveSceneWarning = new LocalString(
+            // ru
+            "Что-то пошло не так. Файл сцены повреждён или не сохранен. Сохраните сцену и повторите попытку",
+            // en
+            "Somethings go wrong. Scene file may be corrupted or outdated. Please, save your Scene and try again");
+        public readonly static LocalString str_ObjectIDNotFound = new LocalString(
+            // ru
+            "не найден в файле сцены",
+            // en
+            "not found in the Scene file");
+        public readonly static LocalString str_DeadScriptAtThePosition = new LocalString(
+           // ru
+           "мёртвый скрипт обнаружен на позиции",
+           // en
+           "dead script detected at the position");
+        #endregion
     }
 
 }

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -23,12 +22,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public GlobalObjectId globalID { get; }
 
         /// <summary>
-        /// Все прикреплённые компоненты, включая мёртвые!
+        /// Все прикреплённые компоненты, включая мёртвые
         /// </summary>
         public List<ComponentID> componentIDs { get; }
 
         /// <summary>
-        /// ID, с помощью которого мы можем найти объект в файле сцены!
+        /// ID, с помощью которого мы можем найти объект в файле сцены
         /// </summary>
         public ulong id { get { return globalID.targetObjectId; } }
 
@@ -38,7 +37,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public List<ulong> liveIDs { get; } = new List<ulong>();
 
         /// <summary>
-        /// Мёртвые скрипты
+        /// Количество мёртвых криптов на инспектируемом объекте
         /// </summary>
         public int missingScriptsCount { get; } = 0;
 
@@ -46,14 +45,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// Получить информацию об этом объекте, чтобы найти его в файле сцен
         /// </summary>
         /// <param name="obj">Объект</param>
-        /// <param name="dbg">Использовать отладку</param>
-        public ObjectID(GameObject obj, bool dbg = false)
+        /// <param name="debugMode">Использовать режим отладки (режим отладки может существено замедлить обыск сцены!)</param>
+        public ObjectID(GameObject obj, bool debugMode = false)
         {
             gameObject = obj;
             globalID = GlobalObjectId.GetGlobalObjectIdSlow(obj);
             componentIDs = ComponentID.GetComponentIDs(obj);
 
-            if (dbg)
+            if (debugMode)
             {
                 Debug.Log($"<b>Object</b>: <color=blue>{obj.name}</color>; " +
                           $"Global ID: <color=blue>{globalID.targetObjectId}</color>; " +
@@ -67,26 +66,21 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 if (cid.alive)
                 {
                     ulong id = cid.cid;
-                    liveIDs.Add(id); // сохраняем живой ID
+                    liveIDs.Add(id);
                 }
                 else
                 {
-                    if (dbg)
+                    if (debugMode)
                     {
-                        Debug.Log($"<color=red><b>Object</b> <i>{obj}</i>: dead script detected at the position #{i}</color>");
+                        Debug.Log($"<color=red><b>Object</b> <i>{obj}</i>: {str_DeadScriptAtThePosition} #{i}</color>");
                     }
                     missingScriptsCount++;
                 }
 
-                if (dbg)
+                if (debugMode)
                 {
-                    string dbgObjID = (cid.cid == 0) ?
-                                       $"<color=red>{cid.cid}</color>" :
-                                    
-                                       $"<color=blue>{cid.cid}</color>";
-                    string dbgScriptType;
-                    string dbgConclusion;
-
+                    string dbgObjID = (cid.cid == 0) ? $"<color=red>0</color>" :  $"<color=blue>{cid.cid}</color>";
+                    string dbgScriptType, dbgConclusion;
                     if (cid.alive)
                     {
                         dbgScriptType = $"<color=blue>{cid.type}</color> with metadata token: " +
@@ -105,13 +99,22 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             }
         }
 
-        public void DebugObjectNotFound() // объекта нет в файле сцены (возможно, это префаб?)
+        /// <summary>
+        /// Оповещение в консоль о том, что ObjectID не был найден в файле сцены. Две основные причины, почему 
+        /// это может произойти: 1. сцена повреждена (или не была сохранена); 2. объект находится в составе 
+        /// префаба.
+        /// </summary>
+        public void DebugObjectNotFound()
         {
-            string messageNoObject = $"<color=brown>Object ID <b>{id}</b> does not found in the Scene file;</color> ";
-            messageNoObject += (globalID.targetPrefabId == 0) ? SceneFile.messageSaveSceneWarning : "[Prefab]";
+            string messageNoObject = $"<color=brown>Object ID <b>{id}</b> {str_ObjectIDNotFound};</color> ";
+            messageNoObject += (globalID.targetPrefabId == 0) ? $"<color=red>{str_ObjectIDNotFound}</color>" : "[Prefab]";
             Debug.Log(messageNoObject);
         }
 
+        /// <summary>
+        /// Выделить указанные объекты на сцене
+        /// </summary>
+        /// <param name="oids">Учётки объектов</param>
         public static void Select(List<ObjectID> oids)
         {
             List<GameObject> selectObjects = new List<GameObject>();

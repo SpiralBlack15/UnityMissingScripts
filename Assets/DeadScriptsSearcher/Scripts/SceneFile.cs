@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
 
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
     public class SceneFile
     {
-        public static readonly string messageSaveSceneWarning = $"<color=red>Please, save your Scene and try again</color>";
-
         /// <summary>
         /// Разделитель
         /// </summary>
@@ -111,6 +110,11 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             return file.FindIndex(x => x.Contains($"&{componentGID}"));
         }
 
+        /// <summary>
+        /// Получить информацию об экземпляре компонента по его идентификатору
+        /// </summary>
+        /// <param name="componentGID">GID компонента (идентификатор в файле сцены)</param>
+        /// <returns>Ассоциировнная запись в файле сцены</returns>
         public List<string> ComponentInfo(ulong componentGID)
         {
             int cursor = IndexOfComponent(componentGID);
@@ -128,8 +132,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             }
             return output;
         }
-
-        
 
         /// <summary>
         /// Выуживает все GID компонентов с объекта
@@ -213,7 +215,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             List<ulong> gids = new List<ulong>();
 
-            // идём от GameObject до конца файла, не читая последнюю строчку
+            // идём от GameObject до конца файла
             while (cursor < eofIDX) 
             {
                 cursor++; currentLine = file[cursor];
@@ -235,19 +237,16 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 }
             }
 
-            if (gids.Count == 0 && debug)
-            {
-                Debug.Log("GIDs count is 0");
-            }
+            if (gids.Count == 0 && debug) { Debug.Log("GIDs count is 0"); }
 
             return gids;
         }
 
         // STATICS ================================================================================
         /// <summary>
-        /// Возвращает сцену текстом
+        /// Возвращает текст сцены
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Сцена в виде списка строк</returns>
         public static List<string> GetSceneText(Scene scene)
         {
             string scenePath = scene.path;
@@ -260,7 +259,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// 
         /// ВНИМАНИЕ: парсер расчитан под формат версии 2019.2, 
         /// при изменении формата сцены в более поздних версиях 
-        /// рекомендуется проверить и переписать
+        /// рекомендуется проверить и переписать.
         /// 
         /// Строчка должна иметь вид:
         /// m_Script: {fileID: 11500000, guid: fcc1ec5a861f29f4c83d69421ec0ce56, type: 3}
@@ -269,8 +268,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <returns>GUID mono script'a строкой</returns>
         public static string GetGUIDFromLine(string line)
         {
-            if (!line.Contains("guid"))
-                throw new FormatException("Строка не содержит GUID. Проверьте строку и/или формат файла сцены");
+            if (!line.Contains("guid")) throw new FormatException(str_DebugGUIDNotFound);
 
             var strsplit = line.Split(new string[] { "guid:" }, StringSplitOptions.None);
             strsplit = strsplit[1].Split(',');
@@ -284,20 +282,21 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// 
         /// ВНИМАНИЕ: парсер расчитан под формат версии 2019.2, 
         /// при изменении формата сцены в более поздних версиях 
-        /// рекомендуется проверить и переписать
+        /// рекомендуется проверить и переписать.
         /// 
-        /// Строчка должна иметь вид:
+        /// Строка должна иметь следующий вид:
         /// --- !u!114 &64005245
         /// </summary>
-        /// <param name="line">Строчка файла</param>
+        /// <param name="line">Строка файла</param>
         /// <returns>ScriptID строкой</returns>
         public static ulong GetScriptIDFromLine(string line)
         {
             try
             {
-                string capstr = line.Split('&')[1];
-                capstr = capstr.Split(' ')[0]; // отрезаем строковую часть т.к. там может быть stripped: --- !u!114 &1933180445 stripped
-                string scriptID = capstr.Trim(); // получили scriptID
+                string capstr = line.Split('&')[1]; 
+                // отрезаем строковую часть т.к. там может быть stripped: --- !u!114 &1933180445 stripped
+                capstr = capstr.Split(' ')[0];
+                string scriptID = capstr.Trim();
                 ulong answer = Convert.ToUInt64(scriptID);
                 return answer;
             }
@@ -309,17 +308,16 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         /// <summary>
-        /// Извлекает fileID из строчки файла
+        /// Извлекает fileID (GID) из строчки файла
         /// </summary>
         /// <param name="line">Входная строка</param>
         /// <param name="splitAfter">Разделитель справа от fileID</param>
-        /// <returns></returns>
+        /// <returns>GID (уникальный идентификатор) объекта или компонента в файле сцены</returns>
         public static ulong GetFileIDFromLine(string line, char splitAfter = '}')
         {
             try
             {
-                if (!line.Contains("fileID:"))
-                    throw new FormatException("Строка не содержит GUID. Проверьте строку и/или формат файла сцены");
+                if (!line.Contains("fileID:")) throw new FormatException(str_DebugGUIDNotFound);
 
                 var strsplit = line.Split(new string[] { "fileID:" }, StringSplitOptions.None);
                 strsplit = strsplit[1].Split(splitAfter);

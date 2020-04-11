@@ -1,15 +1,22 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
-using UnityEditor;
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
+    /// <summary>
+    /// Учётная запись для одного GUID'a (в основном для мёртвого, см. DeadScripts.cs).
+    /// Собирает в себе все объекты, содержащие компоненты с этим GUID, а также сами
+    /// компоненты. 
+    /// </summary>
     public class ScriptGUID
     {
         /// <summary>
-        /// GUID, ассоциированный со скриптом
+        /// GUID, ассоциированный с компонентом.
+        /// GUID определяет идентификатор типа компонента, т.е. два
+        /// компонента одного типа будут иметь одинаковый GUID. Так, 
+        /// зная GUID мёртвого компонента, мы можем узнать, что два 
+        /// потерянных компонента принадлежат (или не принадлежат)
+        /// одному и тому же пропавшему скрипту.
         /// </summary>
         public string guid { get; }
 
@@ -19,12 +26,18 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public List<ObjectID> oids { get; } = new List<ObjectID>();
 
         /// <summary>
-        /// Все MonoBehaviour со скриптом этого вида
+        /// Все экземпляры компонент со скриптом этого вида
         /// </summary>
         public List<ScriptInstanceGID> gids { get; } = new List<ScriptInstanceGID>();
 
-        // EDITOR WINDOW STUFF --------------------------------------------------------------------
+        /// <summary>
+        /// GUID принадлежит мёртвому скрипту
+        /// </summary>
         public bool isDead { get; }
+
+        /// <summary>
+        /// Флаг для EditorWindow
+        /// </summary>
         public bool showInfo { get; set; } = false;
 
         public ScriptGUID(string guid, bool isDead)
