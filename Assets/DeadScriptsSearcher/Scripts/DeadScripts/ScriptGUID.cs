@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Spiral.Core;
 
 #if UNITY_EDITOR
 namespace Spiral.EditorTools.DeadScriptsSearcher

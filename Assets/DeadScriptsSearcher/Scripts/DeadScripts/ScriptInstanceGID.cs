@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Spiral.Core;
 
 #if UNITY_EDITOR
 namespace Spiral.EditorTools.DeadScriptsSearcher
@@ -32,7 +33,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         {
             this.gid = gid;
             fileEntry = "";
-            List<string> entryList = sceneFile.ComponentInfo(gid);
+            List<string> entryList = sceneFile.GetComponentEntry(gid);
             if (entryList == null) return;
             fileEntry = entryList.List2String();
         }

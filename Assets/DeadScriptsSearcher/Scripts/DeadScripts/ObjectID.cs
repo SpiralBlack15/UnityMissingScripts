@@ -70,7 +70,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
                 if (cid.alive)
                 {
-                    ulong id = cid.cid;
+                    ulong id = cid.gid;
                     liveIDs.Add(id);
                 }
                 else
@@ -84,13 +84,13 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
                 if (debugMode)
                 {
-                    string dbgObjID = (cid.cid == 0) ? $"<color=red>0</color>" :  $"<color=blue>{cid.cid}</color>";
+                    string dbgObjID = (cid.gid == 0) ? $"<color=red>0</color>" :  $"<color=blue>{cid.gid}</color>";
                     string dbgScriptType, dbgConclusion;
                     if (cid.alive)
                     {
                         dbgScriptType = $"<color=blue>{cid.type}</color> with metadata token: " +
                                         $"<color=blue>{cid.metadataToken}</color>";
-                        dbgConclusion = (cid.monoScript != null) ? 
+                        dbgConclusion = (cid.mScript != null) ? 
                                         $"<color=grey>MONO</color>" : 
                                         $"<color=grey>NOT MONO</color>";
                     }

@@ -18,7 +18,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         [NonSerialized]private Color colorGood   = new Color(0.8f, 0.8f, 0.8f);
         private Color defaultColor = Color.white;
 
-        private List<ObjectID> oids = new List<ObjectID>();
+        private readonly List<ObjectID> oids = new List<ObjectID>();
 
         [MenuItem("Spiral Tools/Object Inspector")]
         public static void Init()
@@ -27,18 +27,15 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             window.Show();
         }
 
+        private void OnEnable()
+        {
+            CheckSelection();
+            Repaint();
+        }
+
         private void OnSelectionChange()
         {
-            var selected = Selection.gameObjects;
-            oids.Clear();
-            if (selected != null)
-            {
-                for (int i = 0; i < selected.Length; i++)
-                {
-                    ObjectID oid = new ObjectID(selected[i], false);
-                    oids.Add(oid);
-                }
-            }
+            CheckSelection();
             Repaint();
         }
 
@@ -63,6 +60,20 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
             GUI.color = defaultColor;
+        }
+
+        private void CheckSelection()
+        {
+            var selected = Selection.gameObjects;
+            oids.Clear();
+            if (selected != null)
+            {
+                for (int i = 0; i < selected.Length; i++)
+                {
+                    ObjectID oid = new ObjectID(selected[i], false);
+                    oids.Add(oid);
+                }
+            }
         }
 
         private void DrawObject(ObjectID oid)
@@ -90,7 +101,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         {
             if (oid.componentIDs != null)
             {
-                EditorGUILayout.LabelField($"Components:", EditorStyles.boldLabel, labelOption);
                 for (int comIDX = 0; comIDX < oid.componentIDs.Count; comIDX++)
                 {
                     var cid = oid.componentIDs[comIDX];
@@ -102,12 +112,20 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
                     if (cid.component == null)
                     {
-                        EditorGUILayout.SelectableLabel($"Component is missing!", labelOption);
+                        EditorGUILayout.SelectableLabel($"Component #{comIDX} is missing!", labelOption);
                     }
                     else
                     {
-                        EditorGUILayout.SelectableLabel($"Component: {cid.type.Name}", labelOption);
-                        EditorGUILayout.SelectableLabel($"Fild ID: {cid.goid.targetObjectId}", labelOption);
+                        EditorGUILayout.SelectableLabel($"Component #{comIDX}: {cid.type.Name}", labelOption);
+                        EditorGUILayout.SelectableLabel($"Fild ID: {cid.gid}", labelOption);
+                        if (!string.IsNullOrEmpty(cid.guid))
+                        {
+                            EditorGUILayout.SelectableLabel($"Script GUID: {cid.guid}", labelOption);
+                        }
+                        else
+                        {
+                            EditorGUILayout.LabelField("No GUID found", labelOption);
+                        }
                     }
 
                     EditorGUILayout.EndVertical();

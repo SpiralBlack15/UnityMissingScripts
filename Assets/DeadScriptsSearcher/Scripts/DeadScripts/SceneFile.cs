@@ -9,6 +9,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 {
     public class SceneFile
     {
+        #region Separators
         /// <summary>
         /// Разделитель
         /// </summary>
@@ -33,12 +34,22 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// m_Component поле
         /// </summary>
         public static readonly string unitComponent = "m_Component";
+        #endregion
 
-        // FUNCTIONALITY ==========================================================================
-        //=========================================================================================
+        private static SceneFile m_current = null;
+        public static SceneFile current
+        {
+            get
+            {
+                if (m_current == null) m_current = new SceneFile();
+                return m_current;
+            }
+        }
+
         private Scene inspectedScene;
-        private readonly List<string> file = new List<string>();
+        private List<string> file = new List<string>();
         public int count { get { return file.Count; } }
+
         public string this[int idx]
         {
             get
@@ -55,6 +66,8 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             }
         }
 
+        // FUNCTIONALITY ==========================================================================
+        //=========================================================================================
         public void SaveScene(string newName = "")
         {
             string scenePath = inspectedScene.path;
@@ -74,10 +87,20 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             file = GetSceneText(scene);
         }
 
-        public SceneFile()
+        private SceneFile()
         {
             inspectedScene = SceneManager.GetActiveScene();
             file = GetSceneText(inspectedScene);
+        }
+
+        public void Reload()
+        {
+            file = GetSceneText(inspectedScene);
+        }
+
+        public static void ReloadCurrent()
+        {
+            current.Reload();
         }
 
         /// <summary>
@@ -87,7 +110,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <returns>Номер строки в файле сцены, откуда начинается объект
         /// -1, если объекта нет
         /// -2, если объект находится в составе префаба</returns>
-        public int IndexOfObject(ObjectID oid)
+        public int FindObjectCaptionIDX(ObjectID oid)
         {
             int strIDX = file.FindIndex(x => x.Contains($"&{oid.id}"));
             if (strIDX < 0)
@@ -105,7 +128,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// </summary>
         /// <param name="componentGID"></param>
         /// <returns></returns>
-        public int IndexOfComponent(ulong componentGID)
+        public int FindComponentCaptionIDX(ulong componentGID)
         {
             return file.FindIndex(x => x.Contains($"&{componentGID}"));
         }
@@ -115,9 +138,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// </summary>
         /// <param name="componentGID">GID компонента (идентификатор в файле сцены)</param>
         /// <returns>Ассоциировнная запись в файле сцены</returns>
-        public List<string> ComponentInfo(ulong componentGID)
+        public List<string> GetComponentEntry(ulong componentGID)
         {
-            int cursor = IndexOfComponent(componentGID);
+            int cursor = FindComponentCaptionIDX(componentGID);
             if (cursor < 0) return null;
             List<string> output = new List<string>(); 
             string currentLine = file[cursor];
@@ -141,7 +164,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <returns>null если объект не был найден, пустой лист, если у объекта нет GIDов</returns>
         public List<ulong> GetCGIDs(ObjectID oid, bool debug)
         {
-            int strIDX = IndexOfObject(oid);
+            int strIDX = FindObjectCaptionIDX(oid);
             if (strIDX < 0) return null;
             int cursor = strIDX + 2; // сдвигаем сразу на две позиции
             return GetComponentsGIDs(cursor, debug);
@@ -155,7 +178,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <returns></returns>
         public string GetGUID(ulong componentGID, bool debug)
         {
-            int strIDX = IndexOfComponent(componentGID);
+            int strIDX = FindComponentCaptionIDX(componentGID);
             if (strIDX < 0)
             {
                 if (debug) Debug.Log($"Component GID {componentGID} not found");

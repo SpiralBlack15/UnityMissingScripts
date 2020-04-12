@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Spiral.Core;
 using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
 
 #if UNITY_EDITOR
@@ -10,10 +11,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
     public static class DeadScripts
     {
         public static bool isDebugMode = false;
-
+        private static SceneFile sceneFile { get { return SceneFile.current; } }
         public static List<ObjectID> deadOIDs  { get; private set; } = new List<ObjectID>();
         public static List<ScriptGUID> deadGUIDs { get; private set; } = new List<ScriptGUID>();
-
         public static bool sceneFileLoaded
         {
             get
@@ -23,10 +23,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 return true;
             }
         }
-
         public static bool isDirty { get { return SceneManager.GetActiveScene().isDirty; } }
-
-        private static SceneFile sceneFile = null;
 
         // FUNCTIONALITY --------------------------------------------------------------------------
         public static void SelectDeads()
@@ -36,6 +33,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public static void UpdateDeadList()
         {
+            SceneFile.ReloadCurrent();
             var objects = CoreFunctions.CollectScene().Transforms2GameObjects();
             int count = objects.Count;
 
@@ -65,7 +63,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public static void SearchForDeads()
         {
             UpdateDeadList();
-            sceneFile = new SceneFile();
             deadGUIDs = new List<ScriptGUID>();
 
             int count = deadOIDs.Count; // список deadOIDs сформирован функцией UpdateDeadList()

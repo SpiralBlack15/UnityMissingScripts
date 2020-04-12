@@ -2,29 +2,24 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Spiral.EditorTools.DeadScriptsSearcher
+namespace Spiral.Core
 {
     public static class CoreFunctions
     {
-        public static string List2String(this List<string> entry)
+        /// <summary>
+        /// Конвертирует любой массив в лист
+        /// </summary>
+        /// <typeparam name="T">Тип массива</typeparam>
+        /// <param name="ts">Входной массив</param>
+        /// <returns>Лист на основе входногоо массив</returns>
+        public static List<T> Array2List<T>(this T[] ts) where T : class
         {
-            string output = "";
-            int count = entry.Count;
-            for (int e = 0; e < count; e++)
-            {
-                output += entry[e];
-                if (e != count - 1) output += "\n";
-            }
-            return output;
+            return new List<T>(ts);
         }
 
-        public static List<T> Array2List<T>(this T[] ts) where T : Object
-        {
-            List<T> output = new List<T>();
-            for (int i = 0; i < ts.Length; i++) { output.Add(ts[i]); }
-            return output;
-        }
-
+        /// <summary>
+        /// Конвертирует лист Transforms в лист Game Objects
+        /// </summary>
         public static List<GameObject> Transforms2GameObjects(this List<Transform> transforms)
         {
             List<GameObject> reply = new List<GameObject>();
@@ -35,6 +30,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             return reply;
         }
 
+        /// <summary>
+        /// Конвертирует лист Game Objects в лист Transforms
+        /// </summary>
         public static List<Transform> GameObjects2Transforms(this List<GameObject> gameObjects)
         {
             List<Transform> reply = new List<Transform>();
@@ -99,6 +97,23 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 if (childs.Count != 0) output.AddRange(childs);
             }
 
+            return output;
+        }
+
+        /// <summary>
+        /// Лист в одну строчку
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns></returns>
+        public static string List2String(this List<string> entry)
+        {
+            string output = "";
+            int count = entry.Count;
+            for (int e = 0; e < count; e++)
+            {
+                output += entry[e];
+                if (e != count - 1) output += "\n";
+            }
             return output;
         }
     }

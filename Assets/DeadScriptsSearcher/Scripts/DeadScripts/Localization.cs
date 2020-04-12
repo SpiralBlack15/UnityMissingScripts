@@ -88,14 +88,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Select object(s) in scene inspector to view its/their data");
         public readonly static LocalString strMonoView_ShowObjectInfo = new LocalString(
             // ru
-            "Развернуть",
+            "Развернуть список компонент",
             // en
-            "Show");
+            "Show components list");
         public readonly static LocalString strMonoView_HideObjectInfo = new LocalString(
             // ru
-            "Свернуть",
+            "Свернуть список компонент",
             // en
-            "Hide");
+            "Hide components list");
 
 
 
@@ -156,9 +156,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "are excluded from the search.");
         public readonly static LocalString strFindDeadGUIDs = new LocalString(
             // ru
-            "Найти мёртвые GUID в сцене:",
+            "Найти мёртвые GUID в сцене",
             // en
-            "Find dead GUIDs in the scene:");
+            "Find dead GUIDs in the scene");
         public readonly static LocalString strFoundGUIDs = new LocalString(
             // ru
             "Найдено уникальных GUID: ",

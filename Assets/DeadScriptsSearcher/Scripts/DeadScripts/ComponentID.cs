@@ -34,7 +34,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// учётки мёртвых компонентов будут выглядеть одинаково в любом случае,
         /// а для живых они выполняют исключительно информационную функцию.
         /// </summary>
-        public SerializedProperty monoScript { get; } = null;
+        public SerializedProperty mScript { get; } = null;
 
         /// <summary>
         /// Метадата токен, если понадобится
@@ -47,29 +47,38 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public bool alive { get { return component != null; } }
 
         /// <summary>
+        /// GUID скрипта, если есть
+        /// </summary>
+        public string guid { get; private set; } = "";
+
+        /// <summary>
         /// GID компонента (позволяет однозначно идентифицировать экземпляр 
         /// компонента в файле сцены)
         /// </summary>
-        public ulong cid { get { return goid.targetObjectId; } }
+        public ulong gid { get { return goid.targetObjectId; } }
 
         public ComponentID(Component comp)
         {
             component = comp;
             goid = GlobalObjectId.GetGlobalObjectIdSlow(comp);
-
+            
             // пациент скорее жив, чем мёртв?
             if (alive)
             {
                 type = component.GetType();
                 metadataToken = type.MetadataToken;
                 var serComp = new SerializedObject(comp);
-                monoScript = serComp.FindProperty(SceneFile.unitMonoScriptField);
+                mScript = serComp.FindProperty(SceneFile.unitMonoScriptField);
+                if (mScript != null)
+                {
+                    guid = SceneFile.current.GetGUID(gid, false);
+                }
             }
             else // пациент мёртв, мы нашли битый скрипт
             {
                 type = null;
                 metadataToken = -1;
-                monoScript = null;
+                mScript = null;
             }
         }
 
