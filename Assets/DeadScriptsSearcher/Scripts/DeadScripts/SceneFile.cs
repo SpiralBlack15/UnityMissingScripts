@@ -1,12 +1,35 @@
-﻿using System;
+﻿// *********************************************************************************
+// The MIT License (MIT)
+// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// *********************************************************************************
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace Spiral.EditorTools.DeadScriptsSearcher
 {
+    /*
+     * ВНИМАНИЕ: парсер расчитан под формат версии 2019.2 и выше. 
+     * При изменении формата сцены в более поздних версиях 
+     * рекомендуется проверить и переписать соответствующие куски текста.
+     */
+
     public class SceneFile
     {
         #region Separators
@@ -66,8 +89,24 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             }
         }
 
+        public SceneFile(Scene scene)
+        {
+            inspectedScene = scene;
+            file = GetSceneText(scene);
+        }
+
+        private SceneFile()
+        {
+            inspectedScene = SceneManager.GetActiveScene();
+            file = GetSceneText(inspectedScene);
+        }
+
         // FUNCTIONALITY ==========================================================================
         //=========================================================================================
+        /// <summary>
+        /// Сохранить текущий текст сцены (не саму сцену!) в формат новой сцены
+        /// </summary>
+        /// <param name="newName">Новое имя</param>
         public void SaveScene(string newName = "")
         {
             string scenePath = inspectedScene.path;
@@ -81,66 +120,68 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             File.WriteAllLines(scenePath, file.ToArray());
         }
 
-        public SceneFile(Scene scene)
-        {
-            inspectedScene = scene;
-            file = GetSceneText(scene);
-        }
-
-        private SceneFile()
-        {
-            inspectedScene = SceneManager.GetActiveScene();
-            file = GetSceneText(inspectedScene);
-        }
-
+        /// <summary>
+        /// Перезагрузить сцену
+        /// </summary>
         public void Reload()
         {
             file = GetSceneText(inspectedScene);
         }
 
-        public static void ReloadCurrent()
-        {
-            current.Reload();
-        }
-
         /// <summary>
-        /// Находит индекс строки в файле сцены 
+        /// Находит индекс строки в файле сцены, в которой находится заголовок объекта.
+        /// Заголовок вида: --- !u!1 &2049595391
+        /// Где &2049595391 - FileID объекта
         /// </summary>
         /// <param name="oid">Идентификатор объекта</param>
-        /// <returns>Номер строки в файле сцены, откуда начинается объект
-        /// -1, если объекта нет
-        /// -2, если объект находится в составе префаба</returns>
+        /// <returns>Номер строки в файле сцены, откуда начинается объект.
+        /// -1, если объекта нет;
+        /// -2, если объект находится в составе префаба<./returns>
         public int FindObjectCaptionIDX(ObjectID oid)
         {
-            int strIDX = file.FindIndex(x => x.Contains($"&{oid.id}"));
-            if (strIDX < 0)
-            {
-                if (oid.globalID.targetObjectId == 0) return -1;
-                else return -2;
-            }
+            if (oid.fileID == 0) return -1;
+            int strIDX = file.FindIndex(x => x.Contains($"&{oid.fileID}"));
+            if (strIDX < 0) return -2;
             return strIDX;
         }
 
         /// <summary>
-        /// Находит скрипт по его GID'у
-        /// По факту ищет заголовок вида: 
-        /// --- !u!114 &2049595391
+        /// Находит индекс строки в файле сцены, в которой находится заголовок объекта.
+        /// Заголовок вида: --- !u!1 &2049595391
+        /// Где &2049595391 - FileID объекта
         /// </summary>
-        /// <param name="componentGID"></param>
-        /// <returns></returns>
-        public int FindComponentCaptionIDX(ulong componentGID)
+        /// <param name="objectFileID">FileID объекта (идентификатор в файле сцены)</param>
+        /// <returns>Номер строки в файле сцены, откуда начинается объект.
+        /// -1, если объекта нет;
+        /// -2, если объект находится в составе префаба<./returns>
+        public int FindObjectCaptionIDX(ulong objectFileID)
         {
-            return file.FindIndex(x => x.Contains($"&{componentGID}"));
+            if (objectFileID == 0) return -1;
+            int strIDX = file.FindIndex(x => x.Contains($"&{objectFileID}"));
+            if (strIDX < 0) return -2;
+            return strIDX;
+        }
+
+        /// <summary>
+        /// Находит индекс строки в файле сцены, в которой находится заголовок скрипта.
+        /// Заголовок вида: --- !u!114 &2049595391
+        /// Где &2049595391 - FileID скрипта.
+        /// </summary>
+        /// <param name="componentFileID">FileID компонента (идентификатор в файле сцены)</param>
+        /// <returns></returns>
+        public int FindComponentCaptionIDX(ulong componentFileID)
+        {
+            return file.FindIndex(x => x.Contains($"&{componentFileID}"));
         }
 
         /// <summary>
         /// Получить информацию об экземпляре компонента по его идентификатору
         /// </summary>
-        /// <param name="componentGID">GID компонента (идентификатор в файле сцены)</param>
+        /// <param name="componentFileID">FileID компонента (идентификатор в файле сцены)</param>
         /// <returns>Ассоциировнная запись в файле сцены</returns>
-        public List<string> GetComponentEntry(ulong componentGID)
+        public List<string> GetComponentEntry(ulong componentFileID)
         {
-            int cursor = FindComponentCaptionIDX(componentGID);
+            int cursor = FindComponentCaptionIDX(componentFileID);
             if (cursor < 0) return null;
             List<string> output = new List<string>(); 
             string currentLine = file[cursor];
@@ -157,31 +198,51 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         /// <summary>
-        /// Выуживает все GID компонентов с объекта
+        /// Выуживает все FileID (идентификаторы в файле сцены) компонентов с объекта,
+        /// независимо от того, живые это компоненты или же missing script
         /// </summary>
         /// <param name="oid">Объектный ID</param>
-        /// <param name="debug">Выводить в строку отладки (замедляет работу!)</param>
-        /// <returns>null если объект не был найден, пустой лист, если у объекта нет GIDов</returns>
-        public List<ulong> GetCGIDs(ObjectID oid, bool debug)
+        /// <param name="debugMode">Выводить в строку отладки (замедляет работу)</param>
+        /// <returns>null если объект не был найден; пустой лист, если у объекта нет компонентов</returns>
+        public List<ulong> GetAllComponentsFileIDs(ObjectID oid, bool debugMode)
         {
             int strIDX = FindObjectCaptionIDX(oid);
             if (strIDX < 0) return null;
             int cursor = strIDX + 2; // сдвигаем сразу на две позиции
-            return GetComponentsGIDs(cursor, debug);
+            return GetAllFileIDs(cursor, debugMode);
         }
 
         /// <summary>
-        /// Берёт guid m_Script'a
+        /// Выуживает все FileID (идентификаторы в файле сцены) компонентов с объекта,
+        /// независимо от того, живые это компоненты или же missing script
         /// </summary>
-        /// <param name="componentGID">GID компонента в файле сцены</param>
-        /// <param name="debug">Выводить в строку отладки (замедляет работу!)</param>
-        /// <returns></returns>
-        public string GetGUID(ulong componentGID, bool debug)
+        /// <param name="oid">FileID объекта (идентификатор в файле сцены)</param>
+        /// <param name="debugMode">Выводить в строку отладки (замедляет работу!)</param>
+        /// <returns>null если объект не был найден; пустой лист, если у объекта нет компонентов</returns>
+        public (List<ulong> fileIDs, int strIDX) GetAllComponentsFileIDs(ulong objectFileID, bool debugMode)
         {
-            int strIDX = FindComponentCaptionIDX(componentGID);
+            int strIDX = FindObjectCaptionIDX(objectFileID);
             if (strIDX < 0)
             {
-                if (debug) Debug.Log($"Component GID {componentGID} not found");
+                if (debugMode) Debug.Log("Object caption not found");
+                return (null, strIDX);
+            }
+            int cursor = strIDX + 2; // сдвигаем сразу на две позиции
+            return (GetAllFileIDs(cursor, debugMode), strIDX);
+        }
+
+        /// <summary>
+        /// Берёт guid из поля m_Script у компонента, если такое поле есть
+        /// </summary>
+        /// <param name="componentFileID">FileID компонента (идентификатор в файле сцены)</param>
+        /// <param name="debugMode">Выводить в строку отладки (замедляет работу!)</param>
+        /// <returns>Возвращает пустую строку, если компонент не найден или если скрипт не содержит поля m_Script</returns>
+        public string GetComponentGUID(ulong componentFileID, bool debugMode)
+        {
+            int strIDX = FindComponentCaptionIDX(componentFileID);
+            if (strIDX < 0)
+            {
+                if (debugMode) Debug.Log($"FileID {componentFileID} not found");
                 return string.Empty;
             }
 
@@ -190,8 +251,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             line = file[cursor];
             if (!IsMono(line, false, 0))
             {
-                if (debug) Debug.Log($"Script is not mono: {line}");
-                return string.Empty;
+                if (debugMode) Debug.Log($"Warning: inspected script is not Mono Behaviour: {line}");
+                // вообще, тут можно было бы прерваться и выйти, но можно проверить наличие m_Script всё равно
+                // если эта проверка существенно замедляет работу, добавьте return здесь
             }
 
             int eof = count - 1;
@@ -206,7 +268,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             if (!mscriptFound)
             {
-                if (debug) Debug.Log($"m_Script not found: {line}");
+                if (debugMode) Debug.Log($"m_Script field not found: {line}");
                 return string.Empty;
             }
 
@@ -215,9 +277,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         /// <summary>
-        /// Возвращает все GIDs в разделителе, начиная с нужного места
+        /// Возвращает все FileIDs в разделителе, начиная с нужного места.
         /// Таким образом мы устанавливаем, на какой MonoBehaviour ссылаются конкретно взятые компоненты,
-        /// чтобы потом найти уже их
+        /// чтобы потом найти уже их.
         /// Пример ниже:
         /// m_Component:
         ///     - component: {fileID: 519420032}
@@ -229,7 +291,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <param name="fromIDX">С какой строки начинаем чтение</param>
         /// <param name="debug">Выводить в строку отладки (замедляет работу!)</param>
         /// <returns></returns>
-        private List<ulong> GetComponentsGIDs(int fromIDX, bool debug)
+        private List<ulong> GetAllFileIDs(int fromIDX, bool debug)
         {
             string currentLine;   // читалка строки
             int cursor = fromIDX; // текущая позиция в файле
@@ -266,6 +328,16 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         // STATICS ================================================================================
+        // Статичная часть функционала
+        //=========================================================================================
+        /// <summary>
+        /// Перезагрузить текущий файл сцены
+        /// </summary>
+        public static void ReloadCurrentSceneFile()
+        {
+            current.Reload();
+        }
+
         /// <summary>
         /// Возвращает текст сцены
         /// </summary>
@@ -278,18 +350,13 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         /// <summary>
-        /// Извлекает GUID из файла сцены из строчки вида
-        /// 
-        /// ВНИМАНИЕ: парсер расчитан под формат версии 2019.2, 
-        /// при изменении формата сцены в более поздних версиях 
-        /// рекомендуется проверить и переписать.
-        /// 
-        /// Строчка должна иметь вид:
+        /// Извлекает GUID из строки в файле сцены.
+        /// Строка должна иметь вид:
         /// m_Script: {fileID: 11500000, guid: fcc1ec5a861f29f4c83d69421ec0ce56, type: 3}
         /// </summary>
-        /// <param name="line">Строчка файла</param>
+        /// <param name="line">Строка в файле сцены</param>
         /// <returns>GUID mono script'a строкой</returns>
-        public static string GetGUIDFromLine(string line)
+        private static string GetGUIDFromLine(string line)
         {
             if (!line.Contains("guid")) throw new FormatException(strDebug_GUIDNotFound);
 
@@ -301,18 +368,13 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         }
 
         /// <summary>
-        /// Извлекает ScriptID из файла сцены 
-        /// 
-        /// ВНИМАНИЕ: парсер расчитан под формат версии 2019.2, 
-        /// при изменении формата сцены в более поздних версиях 
-        /// рекомендуется проверить и переписать.
-        /// 
+        /// Извлекает ScriptID из строки в файле сцены.
         /// Строка должна иметь следующий вид:
         /// --- !u!114 &64005245
         /// </summary>
         /// <param name="line">Строка файла</param>
         /// <returns>ScriptID строкой</returns>
-        public static ulong GetScriptIDFromLine(string line)
+        private static ulong GetScriptIDFromLine(string line)
         {
             try
             {
@@ -336,7 +398,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <param name="line">Входная строка</param>
         /// <param name="splitAfter">Разделитель справа от fileID</param>
         /// <returns>GID (уникальный идентификатор) объекта или компонента в файле сцены</returns>
-        public static ulong GetFileIDFromLine(string line, char splitAfter = '}')
+        private static ulong GetFileIDFromLine(string line, char splitAfter = '}')
         {
             try
             {
@@ -367,6 +429,18 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             if (!ismono && dbg) { Debug.Log($"ScriptID <color=blue>{scriptID}</color> is not Mono"); }
             return ismono;
         }
+
+#if UNITY_EDITOR
+        public static void DrawSceneReloadButton()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            if (GUILayout.Button(strSceneFile_ReuploadCurrentSceneText))
+            {
+                ReloadCurrentSceneFile();
+            }
+            EditorGUILayout.EndVertical();
+        }
+#endif
     }
 }
 

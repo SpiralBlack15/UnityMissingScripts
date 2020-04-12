@@ -1,4 +1,17 @@
-﻿using System.Collections.Generic;
+﻿// *********************************************************************************
+// The MIT License (MIT)
+// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// *********************************************************************************
+
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Spiral.Core;
@@ -33,7 +46,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         public static void UpdateDeadList()
         {
-            SceneFile.ReloadCurrent();
+            SceneFile.ReloadCurrentSceneFile();
             var objects = CoreFunctions.CollectScene().Transforms2GameObjects();
             int count = objects.Count;
 
@@ -79,7 +92,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 // ulong gid компонента (равно как и объекта) - это уникальный идентификатор, позволяющий
                 // найти компонент в файле сцены; два одинаковых компонента будут иметь одинаковый GUID,
                 // но разный gid!
-                List<ulong> componentGIDs = sceneFile.GetCGIDs(oid, isDebugMode);
+                List<ulong> componentGIDs = sceneFile.GetAllComponentsFileIDs(oid, isDebugMode);
 
                 // если компонентные гиды не были взяты (объект находится в префабе или сцена была изменена)
                 // если объект находится в префабе, его записи нет в файле сцены.
@@ -103,9 +116,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                     ulong gid = componentGIDs[g];
 
                     // проверяет, что компонент в списке живых, и его рассматривать нет смысла
-                    if (oid.liveIDs.Contains(gid)) continue; 
+                    if (oid.liveComponentIDs.Contains(gid)) continue; 
 
-                    string guid = sceneFile.GetGUID(gid, isDebugMode);
+                    string guid = sceneFile.GetComponentGUID(gid, isDebugMode);
 
                     // GUID не был найден в файле сцены. Это может произойти, если вы не сохранили сцену после изменений,
                     // если файл сцены повреждён. Также это происходит для скриптов, не имеющих поля m_Script в файле 

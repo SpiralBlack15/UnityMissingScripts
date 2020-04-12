@@ -1,4 +1,17 @@
-﻿using System;
+﻿// *********************************************************************************
+// The MIT License (MIT)
+// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// *********************************************************************************
+
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -47,23 +60,23 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public bool alive { get { return component != null; } }
 
         /// <summary>
-        /// GUID скрипта, если есть
+        /// GUID скрипта, если есть.
+        /// У таких компонент как Transform, Camera и т.п. GUID'a нет!
         /// </summary>
         public string guid { get; private set; } = "";
 
         /// <summary>
-        /// GID компонента (позволяет однозначно идентифицировать экземпляр 
+        /// FileID компонента (позволяет однозначно идентифицировать экземпляр 
         /// компонента в файле сцены)
         /// </summary>
-        public ulong gid { get { return goid.targetObjectId; } }
+        public ulong fileID { get { return goid.targetObjectId; } }
 
         public ComponentID(Component comp)
         {
             component = comp;
             goid = GlobalObjectId.GetGlobalObjectIdSlow(comp);
             
-            // пациент скорее жив, чем мёртв?
-            if (alive)
+            if (alive) // пациент скорее жив, чем мёртв?
             {
                 type = component.GetType();
                 metadataToken = type.MetadataToken;
@@ -71,7 +84,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 mScript = serComp.FindProperty(SceneFile.unitMonoScriptField);
                 if (mScript != null)
                 {
-                    guid = SceneFile.current.GetGUID(gid, false);
+                    guid = SceneFile.current.GetComponentGUID(fileID, false);
                 }
             }
             else // пациент мёртв, мы нашли битый скрипт
@@ -80,21 +93,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 metadataToken = -1;
                 mScript = null;
             }
-        }
-
-        /// <summary>
-        /// Получить список компонент на объекте
-        /// </summary>
-        public static List<ComponentID> GetComponentIDs(GameObject obj)
-        {
-            Component[] components = obj.GetComponents<Component>();
-            List<ComponentID> cids = new List<ComponentID>();
-            for (int i = 0; i < components.Length; i++)
-            {
-                ComponentID cid = new ComponentID(components[i]);
-                cids.Add(cid);
-            }
-            return cids;
         }
     }
 }
