@@ -22,7 +22,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
     /// Собирает в себе все объекты, содержащие компоненты с этим GUID, а также сами
     /// компоненты. 
     /// </summary>
-    public class ScriptGUID
+    public class ComponentGUID
     {
         /// <summary>
         /// GUID, ассоциированный с компонентом.
@@ -42,7 +42,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// Все экземпляры компонент со скриптом этого вида
         /// </summary>
-        public List<ScriptInstanceGID> gids { get; } = new List<ScriptInstanceGID>();
+        public List<ComponentData> gids { get; } = new List<ComponentData>();
 
         /// <summary>
         /// GUID принадлежит мёртвому скрипту
@@ -54,7 +54,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// </summary>
         public bool showInfo { get; set; } = false;
 
-        public ScriptGUID(string guid, bool isDead)
+        public ComponentGUID(string guid, bool isDead)
         {
             this.isDead = isDead;
             this.guid = guid;

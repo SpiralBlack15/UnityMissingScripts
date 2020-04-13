@@ -144,14 +144,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             {
                 for (int i = 0; i < DeadScripts.deadGUIDs.Count; i++)
                 {
-                    ScriptGUID dead = DeadScripts.deadGUIDs[i];
+                    ComponentGUID dead = DeadScripts.deadGUIDs[i];
                     DrawDeadGUIDEntry(dead);
                 }
             }
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawDeadGUIDEntry(ScriptGUID dead)
+        private void DrawDeadGUIDEntry(ComponentGUID dead)
         {
             GUILayoutOption labelOption = GUILayout.Height(20);
             GUI.color = new Color(0.5f, 0.5f, 0.5f);
@@ -168,7 +168,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 for (int i = 0; i < dead.gids.Count; i++)
                 {
                     var dgid = dead.gids[i];
-                    var dgidID = dgid.gid;
+                    var dgidID = dgid.fileID;
 
                     string strGID = $"{dgidID}";
                     string strButtonName = $"#{i} MonoBehaviour ID: {strGID}";

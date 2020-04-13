@@ -216,19 +216,24 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Search dead objects");
         public readonly static LocalString strProgressBar_SearchingScene = new LocalString(
             // ru
-            "Поиск по сцене",
+            "Поиск в сцене: ",
             // en
-            "Searching scene");
-        public readonly static LocalString strProgressBar_SearchingSceneFile = new LocalString(
+            "Searching scene: ");
+        public readonly static LocalString strProgressBar_SearchingSceneObjects = new LocalString(
             // ru
-            "Поиск по файлу сцены",
+            "объектов проверено",
             // en
-            "Searching scene file");
+            "objects tested");
+        public readonly static LocalString strProgressBar_ObjectsFound = new LocalString(
+           // ru
+           "Битых объектов найдено: ",
+           // en
+           "Corrupted objects found: ");
         public readonly static LocalString strProgressBar_InspectedObject = new LocalString(
-            // ru
-            "Проверяем объект: ",
-            // en
-            "Inspected object: ");
+           // ru
+           "Проверяем объект: ",
+           // en
+           "Inspected object: ");
 
         // DEBUG AND EXCEPTION MESSAGES -----------------------------------------------------------
         public readonly static LocalString strDebug_GUIDNotFound = new LocalString(

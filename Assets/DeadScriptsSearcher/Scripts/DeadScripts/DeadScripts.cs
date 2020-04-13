@@ -26,7 +26,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public static bool isDebugMode = false;
         private static SceneFile sceneFile { get { return SceneFile.current; } }
         public static List<ObjectID> deadOIDs  { get; private set; } = new List<ObjectID>();
-        public static List<ScriptGUID> deadGUIDs { get; private set; } = new List<ScriptGUID>();
+        public static List<ComponentGUID> deadGUIDs { get; private set; } = new List<ComponentGUID>();
         public static bool sceneFileLoaded
         {
             get
@@ -55,15 +55,20 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
             for (int i = 0; i < count; i++)
             {
+                float progress = i * 1f / count;
+                EditorUtility.DisplayProgressBar(strProgressBar_SearchDeadObject,
+                                                 strProgressBar_SearchingScene + $"{i} / {count} " + strProgressBar_SearchingSceneObjects,
+                                                 progress);
+
                 GameObject go = objects[i];
                 int missings = GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(go);
                 if (missings == 0) continue;
 
+                // мы создаём ObjectID в этом режиме ТОЛЬКО для объектов, у которых
+                // обнаужены MissingScripts, чтобы обыск сцены не занимал слишком много
+                // времени
                 ObjectID objectID = new ObjectID(go, isDebugMode);
                 deadOIDs.Add(objectID);
-                EditorUtility.DisplayProgressBar(strProgressBar_SearchDeadObject,
-                                                 strProgressBar_SearchingScene, 
-                                                 i * 1f / count);
             }
             EditorUtility.ClearProgressBar();
 
@@ -76,61 +81,28 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         public static void SearchForDeads()
         {
             UpdateDeadList();
-            deadGUIDs = new List<ScriptGUID>();
+            deadGUIDs = new List<ComponentGUID>();
 
             int count = deadOIDs.Count; // список deadOIDs сформирован функцией UpdateDeadList()
             for (int i = 0; i < count; i++)
             {
-                EditorUtility.DisplayProgressBar(strProgressBar_SearchingSceneFile,
+                EditorUtility.DisplayProgressBar(strProgressBar_ObjectsFound + $"{count}",
                                                  strProgressBar_InspectedObject + $"{i} / {count}", 
                                                  i * 1f / count);
-
-                // инспектируемая учётка объекта
                 ObjectID oid = deadOIDs[i];
 
-                // идентфикаторы компонентов берутся напрямую из файла сцены
-                // ulong gid компонента (равно как и объекта) - это уникальный идентификатор, позволяющий
-                // найти компонент в файле сцены; два одинаковых компонента будут иметь одинаковый GUID,
-                // но разный gid!
-                List<ulong> componentGIDs = sceneFile.GetAllComponentsFileIDs(oid, isDebugMode);
-
-                // если компонентные гиды не были взяты (объект находится в префабе или сцена была изменена)
-                // если объект находится в префабе, его записи нет в файле сцены.
-                if (componentGIDs == null) 
+                // идём по всем компонентам, т.к. у нас списки листов по индексам ассоциированы
+                // TODO: возможно, имеет смысл оптимизировать всё, что ниже
+                for (int g = 0; g < oid.componentFileIDs.Count; g++)
                 {
-                    if (isDebugMode) oid.DebugObjectNotFound();
-                    continue;
-                }
+                    if (oid.componentLiveStatus[g]) continue; // пропускаем живые компоненты
 
-                // маловероятная ситуация, на практике у любого объекта есть как минимум один компонент
-                // (это Transform); если мы падаем в этот случай, у нас, возможно, какие-то проблемы
-                // с чтением файла сцены.
-                if (componentGIDs.Count == 0) 
-                {
-                    if (isDebugMode) Debug.Log($"GIDs count of {oid.gameObject.name} is 0");
-                    continue;
-                }
+                    string guid = oid.componentGUIDs[g];
+                    if (string.IsNullOrEmpty(guid)) continue; // пропускаем компоненты из префабов и/или по другим причинам не имеющих GUID 
 
-                for (int g = 0; g < componentGIDs.Count; g++)
-                {
-                    ulong gid = componentGIDs[g];
-
-                    // проверяет, что компонент в списке живых, и его рассматривать нет смысла
-                    if (oid.liveComponentIDs.Contains(gid)) continue; 
-
-                    string guid = sceneFile.GetComponentGUID(gid, isDebugMode);
-
-                    // GUID не был найден в файле сцены. Это может произойти, если вы не сохранили сцену после изменений,
-                    // если файл сцены повреждён. Также это происходит для скриптов, не имеющих поля m_Script в файле 
-                    // сцены. Это скрипты вроде скрипта камеры, трансформа и т.п.
-                    if (string.IsNullOrEmpty(guid))
-                    {
-                        if (isDebugMode) Debug.Log($"Script GID: {gid}; GUID not found");
-                        continue;
-                    }
-
-                    // Если GUID найден, создаём учётку для скрипта
-                    ScriptInstanceGID deadGID = new ScriptInstanceGID(gid, sceneFile);
+                    // создаём учётку для этого компонента 
+                    ulong fileID = oid.componentFileIDs[g];
+                    ComponentData deadFileID = new ComponentData(fileID, sceneFile);
 
                     // проверяем, есть ли уже учётка с таким GUID или нет 
                     // не путайте GID- и GUID- учётки: первая описывает конкретный экземпляр скрипта,
@@ -139,14 +111,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                     if (guidIDX >= 0) // добавляем мёртвый компонент и его объект к уже существующей учётке
                     {
                         deadGUIDs[guidIDX].oids.Add(oid);
-                        deadGUIDs[guidIDX].gids.Add(deadGID);
+                        deadGUIDs[guidIDX].gids.Add(deadFileID);
                     }
                     else // создаём новую GUID-учётку
                     {
-                        ScriptGUID deadGUID = new ScriptGUID(guid, true);
+                        ComponentGUID deadGUID = new ComponentGUID(guid, true);
                         deadGUIDs.Add(deadGUID);
                         deadGUID.oids.Add(oid);
-                        deadGUID.gids.Add(deadGID);
+                        deadGUID.gids.Add(deadFileID);
                     }
                 }
             }

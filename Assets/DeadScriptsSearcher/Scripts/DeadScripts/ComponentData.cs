@@ -20,12 +20,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
     /// <summary>
     /// Данные, ассоциированные с конкретным экземпляром компонента на сцене
     /// </summary>
-    public class ScriptInstanceGID
+    public class ComponentData
     {
         /// <summary>
-        /// GID экземпляра компонента, позволяющий найти его в файле сцены
+        /// FileID экземпляра компонента, позволяющий найти его в файле сцены
         /// </summary>
-        public ulong gid { get; }
+        public ulong fileID { get; }
 
         /// <summary>
         /// Соответствующая компоненту запись в файле сцены
@@ -40,13 +40,13 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// Создаёт учётку скрипта
         /// </summary>
-        /// <param name="gid">GID (уникальный идентификатор) экземпляра компонента</param>
+        /// <param name="fileID">GID (уникальный идентификатор) экземпляра компонента</param>
         /// <param name="sceneFile">Файл сцены</param>
-        public ScriptInstanceGID(ulong gid, SceneFile sceneFile)
+        public ComponentData(ulong fileID, SceneFile sceneFile)
         {
-            this.gid = gid;
+            this.fileID = fileID;
             fileEntry = "";
-            List<string> entryList = sceneFile.GetComponentEntry(gid);
+            List<string> entryList = sceneFile.GetComponentEntry(fileID);
             if (entryList == null) return;
             fileEntry = entryList.List2String();
         }

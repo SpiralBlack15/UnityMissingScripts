@@ -67,7 +67,12 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// FileID живых компонентов
         /// </summary>
-        public List<ulong> liveComponentIDs { get; } = new List<ulong>();
+        public List<ulong> liveComponentFileIDs { get; } = new List<ulong>();
+
+        /// <summary>
+        /// Статус компонента из листа LiveComponentFileIDs
+        /// </summary>
+        public List<bool> componentLiveStatus { get; } = new List<bool>();
 
         /// <summary>
         /// Все FileID компонентов (если удалось выудить)
@@ -82,7 +87,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         /// <summary>
         /// FileID мёртвых компонентов (если удалось идентифицировать)
         /// </summary>
-        public List<ulong> deadComponentIDs { get; } = new List<ulong>();
+        public List<ulong> deadComponentFileIDs { get; } = new List<ulong>();
 
         /// <summary>
         /// Количество мёртвых криптов на инспектируемом объекте
@@ -108,26 +113,38 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             componentIDs = new List<ComponentID>();
             Component[] components = obj.GetComponents<Component>();
             for (int i = 0; i < components.Length; i++)
-            {
-                ComponentID cid = new ComponentID(components[i]);
+            { 
+                // TODO: сейчас CID формируется здесь, имеет смысл совместить с тем, что дальше
+                ComponentID cid = new ComponentID(components[i]); 
                 componentIDs.Add(cid);
             }
+            if (debugMode)
+            {
+                Debug.Log($"<b>GameObject</b>: <color=blue>{obj.name}</color>; " +
+                          $"FileID: <color=blue>{fileID}</color>; " + 
+                          $"Scripts Count: <color=blue>{componentIDs.Count}</color>");
+                // fileID у нас есть автоматом после того, как мы получили globalID
+                // если fileID == 0, то у нас какие-то проблемы с globalID
+            }
 
-            // попытка взять все компонент ID соответственно файлу сцены
-            // если объект находится в составе префаба и не является корнем префаба,
+            // Попытка взять все компонент ID соответственно файлу сцены
+            // Если объект находится в составе префаба и не является корнем префаба,
             // то попытка может провалиться, и тогда лист будет заполняться по ходу следующей
-            // процедуры, а вместо битых скриптов будут обозначены нули
+            // процедуры, а вместо битых скриптов будут обозначены нули.
+            // Обратите внимание, что в файле сцены все FileID прикреплённых скриптов идут в том же
+            // порядке, что и компоненты, взятые через GetComponents<>!
             var (fileIDs, strIDX) = SceneFile.current.GetAllComponentsFileIDs(fileID, debugMode);
             componentFileIDs = fileIDs;
             fileCaptionStringIDX = strIDX;
-            bool noMainList = componentFileIDs == null;
-            if (noMainList) componentFileIDs = new List<ulong>();
 
-            if (debugMode)
+            // FileID могут отсутствовать по следующим причинам:
+            // - объект находится в составе префаба
+            // - сцена не была сохранена
+            bool noFileIDFound = componentFileIDs == null;
+            if (noFileIDFound)
             {
-                Debug.Log($"<b>Object</b>: <color=blue>{obj.name}</color>; " +
-                          $"Global ID: <color=blue>{globalID.targetObjectId}</color>; " +
-                          $"Scripts Count: <color=blue>{componentIDs.Count}</color>");
+                if (debugMode) DebugObjectNotFound();
+                componentFileIDs = new List<ulong>();
             }
 
             // WARNING : костыль из костылей, стоит потом весь этот функционал аккуратно запихать в ComponentID
@@ -135,48 +152,68 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             {
                 ComponentID cid = componentIDs[i];
 
-                if (cid.alive)
+                if (cid.alive) // CID соответствует "живому" скрипту
                 {
                     ulong fileID = cid.fileID;
-                    liveComponentIDs.Add(fileID);
-                    if (noMainList) componentFileIDs.Add(fileID);
+                    liveComponentFileIDs.Add(fileID);
+                    if (noFileIDFound) componentFileIDs.Add(fileID);
+
+                    // мы добавляем статусы чтобы избежать ненужных медленных проверок в DeadScripts
+                    componentLiveStatus.Add(true);
                 }
-                else
+                else // CID соответствует "мёртвому" скрипту
                 {
                     if (debugMode)
                     {
                         Debug.Log($"<color=red><b>Object</b> <i>{obj}</i>: {strDebug_DeadScriptAtThePosition} #{i}</color>");
                     }
-                    missingScriptsCount++;
-                    if (noMainList) componentFileIDs.Add(0);
-                    deadComponentIDs.Add(componentFileIDs[i]); // по идее не должно вызывать сбоев
+                    missingScriptsCount++; // чтобы лишний раз не вызывать встроенную функцию, считающую количество мёртвых скриптов
+
+                    // добавляем 0 для случая префабов и пр., когда мы никаким образом не сможем восстановить FileID
+                    if (noFileIDFound) componentFileIDs.Add(0);
+
+                    // если FileID != 0 (см. выше), то он будет уже взят ранее, из перечисления с файла объекта!
+                    deadComponentFileIDs.Add(componentFileIDs[i]);
+
+                    componentLiveStatus.Add(false);
                 }
 
+                // FileID мы только что получили (см. выше)
                 ulong currentFileID = componentFileIDs[i];
                 if (currentFileID != 0)
                 {
+                    // Попытка взять GUID производится только в этом случае, 
+                    // потому что иначе мы в принципе не можем взять GUID никакими доступными путями
+                    // (кроме того, что это, вероятно, не имеет смысла, если у нас FileID == 0)
                     string guid = SceneFile.current.GetComponentGUID(currentFileID, debugMode);
+
+                    // GUID не был найден в файле сцены. Это может произойти, если вы не сохранили сцену после изменений,
+                    // если файл сцены повреждён. Также это происходит для скриптов, не имеющих поля m_Script в файле 
+                    // сцены. Это скрипты вроде скрипта камеры, трансформа и т.п.
+                    if (string.IsNullOrEmpty(guid) && debugMode) Debug.Log($"FileID: {currentFileID}; GUID not found");
                     componentGUIDs.Add(guid);
                 }
+                else
+                {
+                    if (debugMode) Debug.Log($"Cannot take GUID for zero FileID");
+                }
 
+                // Собственно, здесь вывод саммари по этому объекту
                 if (debugMode)
                 {
-                    string dbgObjID = (cid.fileID == 0) ? $"<color=red>0</color>" :  $"<color=blue>{cid.fileID}</color>";
+                    string dbgObjID = (cid.fileID == 0) ? $"<color=red>0</color>" : $"<color=blue>{cid.fileID}</color>";
                     string dbgScriptType, dbgConclusion;
                     if (cid.alive)
                     {
-                        dbgScriptType = $"<color=blue>{cid.type}</color> with metadata token: " +
-                                        $"<color=blue>{cid.metadataToken}</color>";
-                        dbgConclusion = (cid.mScript != null) ? 
-                                        $"<color=grey>MONO</color>" : 
-                                        $"<color=grey>NOT MONO</color>";
+                        dbgScriptType = $"<color=blue>{cid.type}</color> with GUID: [<color=blue>{cid.guid}</color]";
+                        dbgConclusion = (cid.mScript != null) ? $"<color=grey>MONO BEHVAIOUR</color>" : $"<color=grey>NOT MONO BEHVAIOUR</color>";
                     }
                     else
                     {
                         dbgScriptType = $"<color=grey><b>NULL</b></color>";
                         dbgConclusion = $"<color=grey><b>BROKEN</b></color>";
                     }
-                    Debug.Log($"Component {i} with ID: {dbgObjID}; Type: {dbgScriptType}; Is {dbgConclusion}");
+                    Debug.Log($"Component {i} with FileID: {dbgObjID}; Type: {dbgScriptType}; Conclusion: {dbgConclusion}");
                 }
             }
         }
