@@ -1,74 +1,19 @@
 ﻿// *********************************************************************************
 // The MIT License (MIT)
-// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+// Copyright (c) 2020 SpiralBlack https://github.com/SpiralBlack15
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // *********************************************************************************
-
-using UnityEngine;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-namespace Spiral.EditorTools.DeadScriptsSearcher
+namespace Spiral.EditorToolkit.DeadScriptsSearcher
 {
-    public enum Language { RU, ENG }
-    public struct LocalString
+    public static class DeadScriptLocalization
     {
-        public string RU  { get; private set; }
-        public string ENG { get; private set; }
-
-        public LocalString(string RU, string ENG)
-        {
-            this.RU  = RU;
-            this.ENG = ENG;
-        }
-        private string Read(Language local)
-        {
-            switch (local)
-            {
-                case Language.RU:  return RU;
-                case Language.ENG: return ENG;
-
-                default: Debug.LogWarning($"Language {local} not found"); return ENG;
-            }
-        }
-
-        public static implicit operator string(LocalString local)
-        {
-            return local.Read(Localization.lang);
-        }
-    }
-
-    public static class Localization
-    {
-        public static Language lang = Language.RU;
-
-#if UNITY_EDITOR
-        public static void DrawLanguageSelect()
-        {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            lang = (Language)EditorGUILayout.EnumPopup(strLocal, lang);
-            EditorGUILayout.EndVertical();
-        }
-#endif
-
-        // LOCALIZATION ===========================================================================
-        // Simple localization to those who do not understand Russian :)
-        //=========================================================================================
-#region Localization
-        public readonly static LocalString strLocal = new LocalString(
-            // ru
-            "ЯЗЫК:",
-            // en
-            "LANGUAGE:");
-
         // SCENE FILE -----------------------------------------------------------------------------
         public readonly static LocalString strSceneFile_ReuploadCurrentSceneText = new LocalString(
             // ru
@@ -79,9 +24,9 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         // DEAD SCRIPT SEARCHER EDITOR WINDOW -----------------------------------------------------
         public readonly static LocalString strDeadScriptSearcher_Caption = new LocalString(
             // ru
-            "Поиск мёртвых скриптов",
+            "Мёртвые скрипты",
             // en
-            "Dead Scripts Searcher");
+            "Dead Scripts");
         public readonly static LocalString strDeadScriptSearcher_DebugMode = new LocalString(
             // ru
             "Режим отладки",
@@ -101,7 +46,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             // ru
             "Ревизор",
             // en
-            "Auditor"); 
+            "Auditor");
         public readonly static LocalString strMonoView_SelectObject = new LocalString(
             // ru
             "Выделите объект(ы) в инспекторе сцены, чтобы посмотреть данные",
@@ -117,9 +62,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             "Свернуть список компонент",
             // en
             "Hide components list");
-
-
-
         public readonly static LocalString strObjectsOnly = new LocalString(
             // ru
             "Только объекты",
@@ -256,8 +198,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
            "мёртвый скрипт обнаружен на позиции",
            // en
            "dead script detected at the position");
-        #endregion
     }
-
 }
 

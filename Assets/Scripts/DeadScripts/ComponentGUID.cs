@@ -1,10 +1,10 @@
 ﻿// *********************************************************************************
 // The MIT License (MIT)
-// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+// Copyright (c) 2020 SpiralBlack https://github.com/SpiralBlack15
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using Spiral.Core;
 
 #if UNITY_EDITOR
-namespace Spiral.EditorTools.DeadScriptsSearcher
+namespace Spiral.EditorToolkit.DeadScriptsSearcher
 {
     /// <summary>
     /// Учётная запись для одного GUID'a (в основном для мёртвого, см. DeadScripts.cs).

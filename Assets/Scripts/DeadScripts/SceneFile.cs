@@ -1,10 +1,10 @@
 ﻿// *********************************************************************************
 // The MIT License (MIT)
-// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+// Copyright (c) 2020 SpiralBlack https://github.com/SpiralBlack15
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -16,13 +16,11 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
+using static Spiral.EditorToolkit.DeadScriptsSearcher.DeadScriptLocalization;
 
 #if UNITY_EDITOR
 using UnityEditor;
-#endif
-
-namespace Spiral.EditorTools.DeadScriptsSearcher
+namespace Spiral.EditorToolkit.DeadScriptsSearcher
 {
     /*
      * ВНИМАНИЕ: парсер расчитан под формат версии 2019.2 и выше. 
@@ -429,18 +427,17 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             if (!ismono && dbg) { Debug.Log($"ScriptID <color=blue>{scriptID}</color> is not Mono"); }
             return ismono;
         }
-
-#if UNITY_EDITOR
+        
         public static void DrawSceneReloadButton()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginVertical(SpiralStyles.panel);
             if (GUILayout.Button(strSceneFile_ReuploadCurrentSceneText))
             {
                 ReloadCurrentSceneFile();
             }
             EditorGUILayout.EndVertical();
         }
-#endif
     }
 }
+#endif
 

@@ -1,10 +1,10 @@
 ﻿// *********************************************************************************
 // The MIT License (MIT)
-// Copyright (c) 2020 BlackSpiral https://github.com/BlackSpiral15
+// Copyright (c) 2020 SpiralBlack https://github.com/SpiralBlack15
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -14,13 +14,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static Spiral.EditorTools.DeadScriptsSearcher.Localization;
+using static Spiral.EditorToolkit.DeadScriptsSearcher.DeadScriptLocalization;
 
 #if UNITY_EDITOR
 using UnityEditor;
-namespace Spiral.EditorTools.DeadScriptsSearcher
+namespace Spiral.EditorToolkit.DeadScriptsSearcher
 {
-    public class ObjectAuditorWindow : EditorWindow
+    public class ObjectAuditorWindow : SpiralCustomEditorWindow
     {
         private Vector2 scrollPos;
 
@@ -28,7 +28,6 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
         [NonSerialized]private Color colorNormal = new Color(0.5f, 0.8f, 0.5f);
         [NonSerialized]private Color colorAlert  = new Color(0.8f, 0.5f, 0.5f);
         [NonSerialized]private Color colorGood   = new Color(0.9f, 0.9f, 0.9f);
-        private Color defaultColor = Color.white;
 
         private readonly List<ObjectID> oids = new List<ObjectID>();
 
@@ -41,24 +40,21 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
 
         private void OnEnable()
         {
-            CheckSelection();
-            Repaint();
+            CheckAndRepaint();
         }
 
         private void OnSelectionChange()
         {
-            CheckSelection();
-            Repaint();
+            CheckAndRepaint();
         }
 
         private void OnGUI()
         {
-            defaultColor = GUI.color;
             titleContent.text = strMonoView_Caption;
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(position.height));
-           
-            DrawLanguageSelect();
+
+            OpenStandartBack(true);
+            Localization.DrawLanguageSelect();
             SceneFile.DrawSceneReloadButton();
 
             if (oids.Count == 0)
@@ -71,9 +67,14 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                 DrawObject(oids[objIDX]);
             }
 
+            CloseStandartBack();
             EditorGUILayout.EndScrollView();
-            EditorGUILayout.EndVertical();
-            GUI.color = defaultColor;
+        }
+
+        private void CheckAndRepaint()
+        {
+            CheckSelection();
+            Repaint();
         }
 
         private void CheckSelection()
@@ -95,10 +96,10 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
             bool dead = oid.missingScriptsCount > 0;
 
             GUI.color = dead ? colorAlert : colorGood;
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginVertical(SpiralStyles.panel);
             GUI.color = defaultColor;
 
-            EditorGUILayout.LabelField($"Game Object: {oid.gameObject.name}", EditorStyles.boldLabel, labelOption);
+            EditorGUILayout.LabelField($"Game Object: {oid.gameObject.name}", SpiralStyles.boldLabel, labelOption);
             EditorGUILayout.SelectableLabel($"File ID: {oid.globalID.targetObjectId}", labelOption);
 
             string captionIDX;
@@ -140,7 +141,7 @@ namespace Spiral.EditorTools.DeadScriptsSearcher
                     Color drawColor = cid.alive ? colorNormal : colorAlert;
 
                     GUI.color = drawColor;
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    EditorGUILayout.BeginVertical(SpiralStyles.panel);
                     GUI.backgroundColor = defaultColor;
 
                     ulong fileID = oid.componentFileIDs[comIDX]; // соответствует cid.fileID
