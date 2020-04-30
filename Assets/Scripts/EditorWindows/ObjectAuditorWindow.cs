@@ -52,8 +52,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
         {
             titleContent.text = strMonoView_Caption;
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(position.height));
-
-            OpenStandartBack(true);
+            OpenStandartBack();
             Localization.DrawLanguageSelect();
             SceneFile.DrawSceneReloadButton();
 
@@ -94,12 +93,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
         private void DrawObject(ObjectID oid)
         {
             bool dead = oid.missingScriptsCount > 0;
-
-            GUI.color = dead ? colorAlert : colorGood;
-            EditorGUILayout.BeginVertical(SpiralStyles.panel);
-            GUI.color = defaultColor;
-
-            EditorGUILayout.LabelField($"Game Object: {oid.gameObject.name}", SpiralStyles.boldLabel, labelOption);
+            SpiralEditor.BeginPanel($"Game Object: {oid.gameObject.name}", dead ? colorAlert : colorGood, labelOption);
             EditorGUILayout.SelectableLabel($"File ID: {oid.globalID.targetObjectId}", labelOption);
 
             string captionIDX;
@@ -128,7 +122,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 DrawComponentList(oid);
             }
 
-            EditorGUILayout.EndVertical();
+            SpiralEditor.EndPanel(PanelType.Vertical);
         }
 
         private void DrawComponentList(ObjectID oid)
@@ -138,11 +132,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 for (int comIDX = 0; comIDX < oid.componentIDs.Count; comIDX++)
                 {
                     var cid = oid.componentIDs[comIDX];
-                    Color drawColor = cid.alive ? colorNormal : colorAlert;
-
-                    GUI.color = drawColor;
-                    EditorGUILayout.BeginVertical(SpiralStyles.panel);
-                    GUI.backgroundColor = defaultColor;
+                    SpiralEditor.BeginPanel(PanelType.Vertical, cid.alive ? colorNormal : colorAlert);
 
                     ulong fileID = oid.componentFileIDs[comIDX]; // соответствует cid.fileID
                     string guid = oid.componentGUIDs[comIDX];
@@ -177,7 +167,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                         EditorGUILayout.LabelField(message, labelOption);
                     }
 
-                    EditorGUILayout.EndVertical();
+                    SpiralEditor.EndPanel(PanelType.Vertical);
                 }
             }
         }
