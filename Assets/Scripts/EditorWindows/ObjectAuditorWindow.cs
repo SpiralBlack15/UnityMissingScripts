@@ -31,7 +31,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
 
         private readonly List<ObjectID> oids = new List<ObjectID>();
 
-        [MenuItem("Spiral Tools/Object Inspector")]
+        [MenuItem("Spiral Tools/Object Auditor")]
         public static void Init()
         {
             ObjectAuditorWindow window = (ObjectAuditorWindow)GetWindow(typeof(ObjectAuditorWindow));
