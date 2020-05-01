@@ -49,7 +49,7 @@ namespace Spiral.EditorToolkit
 
     public static class Localization
     {
-        private static Language m_language = Language.RU;
+        private static Language m_language = Language.ENG;
         public static Language language
         {
             get { return m_language; }
