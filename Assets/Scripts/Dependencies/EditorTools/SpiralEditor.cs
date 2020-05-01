@@ -13,6 +13,8 @@
 
 using UnityEngine;
 using System;
+using System.Collections.Generic;
+using Spiral.Core;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -108,21 +110,16 @@ namespace Spiral.EditorToolkit
             EditorGUILayout.LabelField(content, boldLabel, options);
         }
 
-        public static void BeginPanel(PanelType panelType)
-        {
-            Color prevColor = GUI.color;
-            GUI.color = defaultPanelColor;
-            if (panelType == PanelType.Vertical) EditorGUILayout.BeginVertical(panel);
-            else EditorGUILayout.BeginHorizontal(panel);
-            GUI.color = prevColor;
-        }
 
-        public static void BeginPanel(PanelType panelType, Color color)
+        private static readonly List<PanelType> panelTypesStack = new List<PanelType>();
+
+        public static void BeginPanel(PanelType panelType, Color? color = null)
         {
             Color prevColor = GUI.color;
-            GUI.color = color;
+            GUI.color = color != null ? (Color)color : defaultPanelColor;
             if (panelType == PanelType.Vertical) EditorGUILayout.BeginVertical(panel);
             else EditorGUILayout.BeginHorizontal(panel);
+            panelTypesStack.Add(panelType);
             GUI.color = prevColor;
         }
 
@@ -155,10 +152,17 @@ namespace Spiral.EditorToolkit
             EditorGUILayout.LabelField(caption, style, options);
         }
 
-        public static void EndPanel(PanelType panelType)
+        public static void EndPanel()
         {
+            if (panelTypesStack.Count == 0)
+            {
+                Debug.LogWarning("No panels to close");
+                return;
+            }
+            PanelType panelType = panelTypesStack.GetLast();
             if (panelType == PanelType.Vertical) EditorGUILayout.EndVertical();
             else EditorGUILayout.EndHorizontal();
+            panelTypesStack.RemoveLast();
         }
 
         public static void DrawScriptField(SerializedObject serializedObject)
@@ -168,7 +172,7 @@ namespace Spiral.EditorToolkit
             GUI.enabled = prop != null;
             EditorGUILayout.PropertyField(prop, true);
             if (!GUI.enabled) GUI.enabled = true;
-            EndPanel(PanelType.Vertical);
+            EndPanel();
         }
 
         public static void DrawEditorScriptField(ScriptableObject editor)
@@ -186,7 +190,7 @@ namespace Spiral.EditorToolkit
                 EditorGUILayout.LabelField("No editor single file found", panel);
             }
             GUI.enabled = true;
-            EndPanel(PanelType.Vertical);
+            EndPanel();
         }
 
         public static void DrawEditorWindowScriptField(ScriptableObject editor)
@@ -204,7 +208,7 @@ namespace Spiral.EditorToolkit
                 EditorGUILayout.LabelField("No editor single file found", panel);
             }
             GUI.enabled = true;
-            EndPanel(PanelType.Vertical);
+            EndPanel();
         }
 
         public static void DrawLogoLine(Color? color = null)
@@ -228,7 +232,7 @@ namespace Spiral.EditorToolkit
             {
                 EditorGUILayout.HelpBox(message, messageType);
             }
-            EndPanel(PanelType.Vertical);
+            EndPanel();
         }
 
         // INITIALIZE STYLES ======================================================================

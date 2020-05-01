@@ -435,7 +435,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
             {
                 ReloadCurrentSceneFile();
             }
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
     }
 }

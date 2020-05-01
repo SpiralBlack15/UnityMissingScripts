@@ -37,7 +37,7 @@ namespace Spiral.EditorToolkit
 
         protected void CloseStandartBack()
         {
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
     }
 }

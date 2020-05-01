@@ -122,7 +122,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 DrawComponentList(oid);
             }
 
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
 
         private void DrawComponentList(ObjectID oid)
@@ -167,7 +167,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                         EditorGUILayout.LabelField(message, labelOption);
                     }
 
-                    SpiralEditor.EndPanel(PanelType.Vertical);
+                    SpiralEditor.EndPanel();
                 }
             }
         }

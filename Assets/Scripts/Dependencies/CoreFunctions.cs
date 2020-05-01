@@ -25,10 +25,21 @@ namespace Spiral.Core
         /// <typeparam name="T">Тип массива</typeparam>
         /// <param name="ts">Входной массив</param>
         /// <returns>Лист на основе входногоо массив</returns>
-        public static List<T> Array2List<T>(this T[] ts) where T : class
+        public static List<T> Array2List<T>(this T[] ts)
         {
             return new List<T>(ts);
         }
+
+        public static T GetLast<T>(this IList<T> ts)
+        {
+            return ts[ts.Count - 1];
+        }
+
+        public static void RemoveLast<T>(this IList<T> ts)
+        {
+            ts.RemoveAt(ts.Count - 1);
+        }
+
 
         /// <summary>
         /// Конвертирует лист Transforms в лист Game Objects

@@ -59,7 +59,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
             {
                 EditorGUILayout.HelpBox(strDeadScriptSearcher_DebugModeHelp, MessageType.Warning);
             }
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
 
         private void DrawSimpleMode()
@@ -70,7 +70,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 DeadScripts.UpdateDeadList();
                 DeadScripts.SelectDeads();
             }
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
 
         private bool foldoutSceneSearchHelp = false;
@@ -87,7 +87,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                                   strSceneClear;
             styleSceneIsDirty.normal.textColor = DeadScripts.isDirty ? new Color(0.8f, 0.0f, 0.0f) : Color.gray;
             EditorGUILayout.LabelField(sceneIsDirty, styleSceneIsDirty);
-            SpiralEditor.EndPanel(PanelType.Horizontal);
+            SpiralEditor.EndPanel();
 
             SpiralEditor.BeginPanel(PanelType.Vertical);
             EditorGUI.indentLevel += 1;
@@ -100,8 +100,8 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 EditorGUILayout.HelpBox(strSceneHelpWarning, MessageType.Warning);
                 EditorGUILayout.HelpBox(strSceneHelpExplanation, MessageType.Info);
             }
-            SpiralEditor.EndPanel(PanelType.Vertical);
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
+            SpiralEditor.EndPanel();
 
             if (SpiralEditor.DrawRoundButton(strFindDeadGUIDs))
             {
@@ -110,7 +110,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
             }
             ShowDeadGUIDs();
 
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
 
         private bool foldoutDeads = false;
@@ -140,7 +140,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                     DrawDeadGUIDEntry(dead);
                 }
             }
-            SpiralEditor.EndPanel(PanelType.Vertical);
+            SpiralEditor.EndPanel();
         }
 
         private void DrawDeadGUIDEntry(ComponentGUID dead)
@@ -178,7 +178,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                         EditorGUILayout.TextArea(dgid.fileEntry);
                         GUI.enabled = true;
                         EditorGUILayout.Space();
-                        SpiralEditor.EndPanel(PanelType.Vertical);
+                        SpiralEditor.EndPanel();
                     }
                 }
             }
