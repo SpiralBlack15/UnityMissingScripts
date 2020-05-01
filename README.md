@@ -12,8 +12,8 @@ This util provides easy search and replace for the missing scripts GUIDs in your
 **Provided functionality**
 
 + Can find all GameObjects with missing scripts on currenty opened Scene.
-+ Can find GUIDs of both alive and missing MonoBehaviour scripts (it does not apply to Unity "system" scripts such as Transform, Camera and so on because they don't have GUID field).
-+ Can select group of objects with the same lost script (if these objects are not prefabed, see limitations), so you can mass replace broken script without having to do this with each script individually.
++ Can find GUIDs of both alive and missing MonoBehaviour scripts (it does not apply to Unity "system" scripts such as Transform, Camera and so on because they don't have m_Script field).
++ Can select group of objects with the same lost script (if these objects are not prefabed), so you can mass replace broken script without having to do this with each script individually.
 + Allows you to browse and survey script's and GameObject's scene file's entry in Unity window.
 + Project has full and switchable ENG/RU localization in EditorWindow.
 
@@ -23,7 +23,7 @@ This util provides easy search and replace for the missing scripts GUIDs in your
 + Works only in opened scene, not in whole project. 
 + Cannot find GUIDs if missing scripts objects are inside prefabs (still, objects with broken scripts can be found as well), except object in prefab's root. This limitation is associated with a scene file search. 
 + Can be very slow on the scenes with big amount (more than thousand) of objects.
-+ Most of the comments in the code are still in Russian. Sorry, too lazy to rewrite everything into English (still you can use Google Translate, and most part are anyway obvious from the code).
++ Most of the comments in the code are still in Russian. Sorry, too lazy to rewrite everything into English (and most of the code is self-explanatory).
 
 ## Installation, launch and usage 
 
@@ -58,7 +58,7 @@ Everytime you select some object(s) on scene, an information panels appears in O
 
 ## Useful information
 
-You can see the implementation of rendering editor script fields in SpiralEditor.cs and use them freely in your projects. Just do not forget that the Editor script should always be in a separate file with a name identical to the class name, otherwise Unity will not see it as MonoScript.
+You can see the implementation of rendering editor script fields in SpiralEditor.cs and use it freely in your projects. Just do not forget that the Editor script should always be in a separate file with a name identical to the class name, otherwise Unity will not see it as MonoScript.
 
 ## License comments
 
@@ -66,7 +66,7 @@ The MIT License (MIT)
 
 Copyright © 2020 SpiralBlack https://github.com/SpiralBlack15
 
-This project provides under the MIT License, look to the license file for more info. Most .cs files in project include part of license about **no warranity**. Just remember it :)
+This project provides under the MIT License, see LICENSE file. Most .cs files in project include part of license about **no warranity**. Just remember it :)
 
 ---
 RU
@@ -74,25 +74,25 @@ RU
 
 ## Обзор
 
-Утилита предоставляет удобный инструментарий для поиска и замены GUID'ов от скриптов-потеряшек в сцене Unity3D.
+Утилита предоставляет удобный инструментарий для поиска и замены GUID'ов от потерянных скриптов в сцене Unity3D.
 
 **Функционал**:
 
 + Находит все объекты с потерянными скриптами на открытой сцене.
-+ Может находить GUID'ы как живых, так и мёртвых MonoBehaviours (это не относится к таким "системным" скриптам Unity как Transform, Camera и подобным, поскольку они не имеют GUID-поля).
++ Может находить GUID'ы как живых, так и мёртвых MonoBehaviours (это не относится к таким "системным" скриптам Unity как Transform, Camera и подобным, поскольку они не имеют поля m_Script).
 + Может выделять группу объектов, имеющих одинаковый потерянный скрипт (если эти объекты не входят в состав префаба, см. ограничения), так что вы можете массово заменять потерянные скрипты существующими без необходимости делать это с каждым скриптом по отдельности.
 + Позволяет просматривать в окне Unity записи конкретных скриптов и объектов из файла сцены.
 + Проект имеет две равноценные переключаемые локализации ENG/RU в окне редактора.
 
 **Текущие ограничения**:
 
-+ Работает под версией **_Unity 2019.2, 2019.3 и выше_**. Ранние версии Unity не поддерживают часть функций.
++ Работает под версиями **_Unity 2019.2, 2019.3 и выше_**. Ранние версии Unity не поддерживают часть функций.
 + Работает только с текущей открытой сценой, не с проектом в целом.
 + Не может идентифицировать GUID'ы мёртвых скрпитов, если те находятся на объектах, входящих в состав префаба (тем не менее, сами объекты она находит), если только объект не является корнем префаба. Это ограничение связано с поиском GUID'ов через файл сцены.
 + Может быть очень медленной для сцен с большим количеством (больше тысячи) объектов.
 + Большая часть комментариев в коде на русском. Хотя для русской локали это скорее плюс, чем минус.
 
-## Установка и использование
+## Установка, запуск и использование
 
 Скопируйте папку в ваш проект, после чего переименуйте её во что-то типа "DeadScriptSearcher", на ваше усмотрение. После этого в верхнее меню Unity будет добавлен выпадающий список _Spiral Tools_. В нём два элемента: _Dead Script Searcher_ и _Object Auditor_, которые открывают отдельные перетаскиваемые окна в редакторе. 
 
@@ -104,7 +104,7 @@ RU
 Здесь есть несколько элементов:
 
 + _Editor_ - показывает EditorWindow-скрипт от Dead Script Searcher'a.
-+ _Language_ - переключатель локализации.
++ _Язык_ - переключатель локализации.
 + _Синхронизировать текст сцены с её файлом_ - позволяет принудительно импортировать %названиесцены%.scene в Поисковик. Обратите внимание на то, что эта кнопка загружает _файл сцены_, не _текущее состояние сцены_, поэтому необходимо сначала сохранить сцену, чтобы быть уверенным, что Поисковик и Ревизор работают правильно (если нет, у вас могут изредка сыпаться сообщения в консоль, что что-то там не найдено).
 + _Режим отладки_ - если включен, все действия Поисковика во время поиска мёртвых GUID'ов будут выводиться в консоль вместе со всей сопутствующей информацией. Это может _существенно_ замедлить поиск по сценам с большим количеством объектов.
 + _Найти и выделить объекты с мёртвыми скриптами_ - делает именно то, что написано: просто быстро находит все объекты, имеющие на себе битые скрипты. Эта функция не ищет мёртвые GUID'ы, однако находит объекты, являющиеся частью префаба. 
@@ -125,7 +125,7 @@ RU
 
 ## Полезная информация
 
-Реализацию отрисовки полей скрипта редактора можете посмотреть в SpiralEditor.cs и свободно использовать в своих проектах, просто не забывайте, что скрипт Editor'a всегда должен лежать в отдельном файле с названием, идентичным названию класса, иначе Unity его не воспринимает как MonoScript.
+Реализацию отрисовки полей скрипта редактора можете посмотреть в SpiralEditor.cs и свободно использовать. Не забывайте, что скрипт Editor'a всегда должен лежать в отдельном файле с названием, идентичным названию класса, иначе Unity его не воспринимает как MonoScript.
 
 ## Комментарии к лицензии
 
