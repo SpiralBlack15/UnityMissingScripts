@@ -430,7 +430,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
         
         public static void DrawSceneReloadButton()
         {
-            SpiralEditor.BeginPanel(PanelType.Vertical);
+            SpiralEditor.BeginPanel(GroupType.Vertical);
             if (SpiralEditor.DrawRoundButton(strSceneFile_ReuploadCurrentSceneText))
             {
                 ReloadCurrentSceneFile();

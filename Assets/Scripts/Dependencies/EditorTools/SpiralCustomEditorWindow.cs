@@ -29,8 +29,8 @@ namespace Spiral.EditorToolkit
         protected void OpenStandartBack(Color? color = null, bool includeLogo = true, bool includeScript = true)
         {
             EditorGUILayout.Space();
-            if (color == null) SpiralEditor.BeginPanel(PanelType.Vertical);
-            else SpiralEditor.BeginPanel(PanelType.Vertical, (Color)color);
+            if (color == null) SpiralEditor.BeginPanel(GroupType.Vertical);
+            else SpiralEditor.BeginPanel(GroupType.Vertical, (Color)color);
             if (includeLogo) SpiralEditor.DrawLogoLine();
             if (includeScript) SpiralEditor.DrawEditorWindowScriptField(this);
         }

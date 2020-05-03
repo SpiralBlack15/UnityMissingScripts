@@ -73,7 +73,7 @@ namespace Spiral.EditorToolkit
 #if UNITY_EDITOR
         public static void DrawLanguageSelect()
         {
-            SpiralEditor.BeginPanel(PanelType.Vertical);
+            SpiralEditor.BeginPanel(GroupType.Vertical);
             language = (Language)EditorGUILayout.EnumPopup(strLocal, language);
             SpiralEditor.EndPanel();
         }

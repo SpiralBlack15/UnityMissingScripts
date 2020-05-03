@@ -132,7 +132,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 for (int comIDX = 0; comIDX < oid.componentIDs.Count; comIDX++)
                 {
                     var cid = oid.componentIDs[comIDX];
-                    SpiralEditor.BeginPanel(PanelType.Vertical, cid.alive ? colorNormal : colorAlert);
+                    SpiralEditor.BeginPanel(GroupType.Vertical, cid.alive ? colorNormal : colorAlert);
 
                     ulong fileID = oid.componentFileIDs[comIDX]; // соответствует cid.fileID
                     string guid = oid.componentGUIDs[comIDX];

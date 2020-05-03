@@ -53,7 +53,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
         //=========================================================================================
         private void DrawDebugMode()
         {
-            SpiralEditor.BeginPanel(PanelType.Vertical);
+            SpiralEditor.BeginPanel(GroupType.Vertical);
             DeadScripts.isDebugMode = EditorGUILayout.Toggle(strDeadScriptSearcher_DebugMode, DeadScripts.isDebugMode);
             if (DeadScripts.isDebugMode)
             {
@@ -78,9 +78,9 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
         {
             SpiralEditor.BeginPanel(strSceneFileCheckout);
 
-            SpiralEditor.BeginPanel(PanelType.Vertical);
+            SpiralEditor.BeginPanel(GroupType.Vertical);
 
-            SpiralEditor.BeginPanel(PanelType.Horizontal);
+            SpiralEditor.BeginPanel(GroupType.Horizontal);
             GUIStyle styleSceneIsDirty = new GUIStyle(SpiralEditor.boldLabel);
             string sceneIsDirty = DeadScripts.isDirty ? 
                                   strSceneWasChanged : 
@@ -89,7 +89,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
             EditorGUILayout.LabelField(sceneIsDirty, styleSceneIsDirty);
             SpiralEditor.EndPanel();
 
-            SpiralEditor.BeginPanel(PanelType.Vertical);
+            SpiralEditor.BeginPanel(GroupType.Vertical);
             EditorGUI.indentLevel += 1;
             foldoutSceneSearchHelp = EditorGUILayout.Foldout(foldoutSceneSearchHelp, 
                                                              strShowHelp, 
@@ -146,7 +146,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
         private void DrawDeadGUIDEntry(ComponentGUID dead)
         {
             GUILayoutOption labelOption = GUILayout.Height(20);
-            SpiralEditor.BeginPanel(PanelType.Vertical);
+            SpiralEditor.BeginPanel(GroupType.Vertical);
 
             EditorGUILayout.SelectableLabel($"GUID: {dead.guid}", GUILayout.MinWidth(250), labelOption);
 
@@ -168,7 +168,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                     }
                     if (dgid.showInfo)
                     {
-                        SpiralEditor.BeginPanel(PanelType.Vertical);
+                        SpiralEditor.BeginPanel(GroupType.Vertical);
                         EditorGUILayout.SelectableLabel(strGID);
                         if (SpiralEditor.DrawRoundButton(strSelectObject))
                         {
