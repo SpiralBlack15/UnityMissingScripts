@@ -1,4 +1,17 @@
-﻿using System;
+﻿// *********************************************************************************
+// The MIT License (MIT)
+// Copyright (c) 2020 SpiralBlack https://github.com/SpiralBlack15
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// *********************************************************************************
+
+using System;
 using UnityEngine;
 
 namespace Spiral.Core
@@ -12,7 +25,7 @@ namespace Spiral.Core
 
         public static float Mantissed(this float value, int mantiss)
         {
-            return Convert.ToSingle(System.Math.Round(value, mantiss));
+            return Convert.ToSingle(Math.Round(value, mantiss));
         }
 
         public static float SafeRead(this float read, float safeValue)
