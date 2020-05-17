@@ -137,7 +137,7 @@ namespace Spiral.Core
         {
             var output = new List<Transform>();
 
-            var rootsGO = SceneManager.GetActiveScene().GetRootGameObjects().ToList();
+            var rootsGO = SceneManager.GetActiveScene().GetRootGameObjects().Listed();
             var rootsTR = rootsGO.ToTransforms();
 
             for (int i = 0; i < rootsTR.Count; i++)
@@ -160,7 +160,7 @@ namespace Spiral.Core
         {
             var output = new List<Transform>();
 
-            var rootsGO = scene.GetRootGameObjects().ToList();
+            var rootsGO = scene.GetRootGameObjects().Listed();
             var rootsTR = rootsGO.ToTransforms();
 
             for (int i = 0; i < rootsTR.Count; i++)

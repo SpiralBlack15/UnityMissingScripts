@@ -38,7 +38,7 @@ namespace Spiral.Core
 
         public static List<GameObject> GetCurrentSceneRoots()
         {
-            return CurrentScene().GetRootGameObjects().ToList();
+            return CurrentScene().GetRootGameObjects().Listed();
         }
 
         public static List<Component> ExclusiveSearch(Type type, Type exclude)

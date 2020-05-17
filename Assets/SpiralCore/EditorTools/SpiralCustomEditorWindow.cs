@@ -19,6 +19,9 @@ namespace Spiral.EditorToolkit
 {
     public class SpiralCustomEditorWindow : EditorWindow
     {
+        private MonoScript m_script = null;
+        protected MonoScript monoScript { get { return this.CashedMono(ref m_script); } }
+
         protected Color colorDefault = Color.white;
 
         private void OnEnable()
@@ -32,7 +35,7 @@ namespace Spiral.EditorToolkit
             if (color == null) SpiralEditor.BeginPanel(GroupType.Vertical);
             else SpiralEditor.BeginPanel(GroupType.Vertical, (Color)color);
             if (includeLogo) SpiralEditor.DrawLogoLine();
-            if (includeScript) SpiralEditor.DrawEditorWindowScriptField(this);
+            if (includeScript) SpiralEditor.DrawScriptField(monoScript, "Editor");
         }
 
         protected void CloseStandartBack()

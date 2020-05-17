@@ -24,6 +24,7 @@ namespace Spiral.EditorToolkit
 
     public static class SpiralEditor
     {
+
         // GUI FUNCTIONS ==========================================================================
         // Заместители GUI
         //=========================================================================================
@@ -34,24 +35,6 @@ namespace Spiral.EditorToolkit
         }
 
         // Buttons --------------------------------------------------------------------------------
-        public static bool Button(string name, params GUILayoutOption[] options)
-        {
-            Color prevColor = GUI.color;
-            GUI.color = SpiralStyles.defaultButtonColor;
-            bool result = GUILayout.Button(name, SpiralStyles.buttonNormal, options);
-            GUI.color = prevColor;
-            return result;
-        }
-
-        public static bool Button(GUIContent name,  params GUILayoutOption[] options)
-        {
-            Color prevColor = GUI.color;
-            GUI.color = SpiralStyles.defaultButtonColor;
-            bool result = GUILayout.Button(name, SpiralStyles.buttonNormal, options);
-            GUI.color = prevColor;
-            return result;
-        }
-
         public static bool Button(string name, GUIStyle style, params GUILayoutOption[] options)
         {
             Color prevColor = GUI.color;
@@ -62,58 +45,69 @@ namespace Spiral.EditorToolkit
             return result;
         }
 
-        public static bool Button(GUIContent name, GUIStyle style, params GUILayoutOption[] options)
+        public static bool Button(string name, params GUILayoutOption[] options)
         {
             Color prevColor = GUI.color;
             GUI.color = SpiralStyles.defaultButtonColor;
+            bool result = GUILayout.Button(name, options);
+            GUI.color = prevColor;
+            return result;
+        }
+
+        public static bool Button(string name, Color color, GUIStyle style = null, params GUILayoutOption[] options)
+        {
+            Color prevColor = GUI.color;
+            GUI.color = color;
             if (style == null) style = SpiralStyles.buttonNormal;
             bool result = GUILayout.Button(name, style, options);
             GUI.color = prevColor;
             return result;
         }
 
-        public static bool Button(string name, Color? color = null, params GUILayoutOption[] options)
+        public static bool CenteredButton(string name, float width = 150, GUIStyle style = null)
         {
-            Color prevColor = GUI.color;
-            GUI.color = color != null ? (Color)color : SpiralStyles.defaultButtonColor;
-            bool result = GUILayout.Button(name, SpiralStyles.buttonNormal, options);
-            GUI.color = prevColor;
-            return result;
+            BeginGroup(GroupType.Horizontal);
+            EditorGUILayout.Space();
+            bool button = Button(name, style, GUILayout.Width(width));
+            EditorGUILayout.Space();
+            EndGroup();
+            return button;
         }
 
-        public static bool Button(GUIContent name, Color? color = null, params GUILayoutOption[] options)
+        public static bool CenteredButton(string name, Color color, float width = 150, GUIStyle style = null)
         {
-            Color prevColor = GUI.color;
-            GUI.color = color != null ? (Color)color : SpiralStyles.defaultButtonColor;
-            bool result = GUILayout.Button(name, SpiralStyles.buttonNormal, options);
-            GUI.color = prevColor;
-            return result;
+            BeginGroup(GroupType.Horizontal);
+            EditorGUILayout.Space();
+            bool button = Button(name, color, style, GUILayout.Width(width));
+            EditorGUILayout.Space();
+            EndGroup();
+            return button;
         }
 
         // Captions -------------------------------------------------------------------------------
         public static void CaptionLabel(GUIContent content, bool selectable = false, bool small = false, params GUILayoutOption[] options)
         {
-            GUIStyle style = small ? SpiralStyles.smallBoldLabel : SpiralStyles.boldLabel;
+            GUIStyle style = small ? SpiralStyles.labelSmallBold : SpiralStyles.labelBold;
             if (!selectable) EditorGUILayout.LabelField(content, style, options);
             else EditorGUILayout.SelectableLabel(content.text, style, options);
         }
 
         public static void CaptionLabel(string content, bool selectable = false, bool small = false, params GUILayoutOption[] options)
         {
-            GUIStyle style = small ? SpiralStyles.smallBoldLabel : SpiralStyles.boldLabel;
+            GUIStyle style = small ? SpiralStyles.labelSmallBold : SpiralStyles.labelBold;
             if (!selectable) EditorGUILayout.LabelField(content, style, options);
             else EditorGUILayout.SelectableLabel(content, style, options);
         }
 
         public static void CaptionLabel(string content, bool small = false, params GUILayoutOption[] options)
         {
-            GUIStyle style = small ? SpiralStyles.smallBoldLabel : SpiralStyles.boldLabel;
+            GUIStyle style = small ? SpiralStyles.labelSmallBold : SpiralStyles.labelBold;
             EditorGUILayout.LabelField(content, style, options);
         }
 
         public static void CaptionLabel(GUIContent content, params GUILayoutOption[] options)
         {
-            EditorGUILayout.LabelField(content, SpiralStyles.boldLabel, options);
+            EditorGUILayout.LabelField(content, SpiralStyles.labelBold, options);
         }
 
         // Panels ---------------------------------------------------------------------------------
@@ -149,21 +143,21 @@ namespace Spiral.EditorToolkit
         public static void BeginPanel(string caption, bool smallCaption, params GUILayoutOption[] options)
         {
             BeginPanel(GroupType.Vertical);
-            GUIStyle style = smallCaption ? SpiralStyles.smallBoldLabel : SpiralStyles.boldLabel;
+            GUIStyle style = smallCaption ? SpiralStyles.labelSmallBold : SpiralStyles.labelBold;
             EditorGUILayout.LabelField(caption, style, options);
         }
 
         public static void BeginPanel(string caption, Color color, params GUILayoutOption[] options)
         {
             BeginPanel(GroupType.Vertical, color);
-            EditorGUILayout.LabelField(caption, SpiralStyles.boldLabel, options);
+            EditorGUILayout.LabelField(caption, SpiralStyles.labelBold, options);
         }
 
         public static void BeginPanel(string caption, bool smallCaption = false, Color? color = null, params GUILayoutOption[] options)
         {
             Color sendColor = color != null ? (Color)color : SpiralStyles.defaultPanelColor;
             BeginPanel(GroupType.Vertical, sendColor);
-            GUIStyle style = smallCaption ? SpiralStyles.smallBoldLabel : SpiralStyles.boldLabel;
+            GUIStyle style = smallCaption ? SpiralStyles.labelSmallBold : SpiralStyles.labelBold;
             EditorGUILayout.LabelField(caption, style, options);
         }
 
@@ -171,7 +165,7 @@ namespace Spiral.EditorToolkit
         {
             Color sendColor = color != null ? (Color)color : SpiralStyles.defaultPanelColor;
             BeginPanel(GroupType.Vertical, sendColor);
-            GUIStyle style = smallCaption ? SpiralStyles.smallBoldLabel : SpiralStyles.boldLabel;
+            GUIStyle style = smallCaption ? SpiralStyles.labelSmallBold : SpiralStyles.labelBold;
             EditorGUILayout.LabelField(caption, style, options);
         }
 
@@ -197,7 +191,7 @@ namespace Spiral.EditorToolkit
         public static bool BeginFoldoutGroup(ref bool foldout, GUIContent content, GUIStyle captionStyle = null, bool autoclose = true, bool autostart = true)
         {
             if (autostart) BeginPanel(GroupType.Vertical);
-            if (captionStyle == null) captionStyle = SpiralStyles.indentedBoldFoldout;
+            if (captionStyle == null) captionStyle = SpiralStyles.foldoutIndentedBold;
             foldout = EditorGUILayout.Foldout(foldout, content, true, captionStyle);
             if (!foldout && autoclose)
             {
@@ -209,7 +203,7 @@ namespace Spiral.EditorToolkit
         public static bool BeginFoldoutGroup(ref bool foldout, string content, GUIStyle captionStyle = null, bool autoclose = true, bool autostart = true)
         {
             if (autostart) BeginPanel(GroupType.Vertical);
-            if (captionStyle == null) captionStyle = SpiralStyles.indentedBoldFoldout;
+            if (captionStyle == null) captionStyle = SpiralStyles.foldoutIndentedBold;
             foldout = EditorGUILayout.Foldout(foldout, content, true, captionStyle);
             if (!foldout && autoclose)
             {
@@ -224,6 +218,20 @@ namespace Spiral.EditorToolkit
         }
 
         // Script fields --------------------------------------------------------------------------
+        #region DRAW SCRIPT FIELDS
+        private static void DrawScriptFieldOnly(MonoScript monoScript, Type type, string content)
+        {
+            if (content == "") content = "Script";
+            if (monoScript != null)
+            {
+                _ = EditorGUILayout.ObjectField(content, monoScript, type, false);
+            }
+            else
+            {
+                EditorGUILayout.LabelField(content, $"Single file of [{type.Name}] not found", SpiralStyles.panel);
+            }
+        }
+
         public static void DrawScriptField(SerializedObject serializedObject)
         {
             BeginPanel(GroupType.Vertical);
@@ -234,40 +242,44 @@ namespace Spiral.EditorToolkit
             EndPanel();
         }
 
-        public static void DrawEditorScriptField(ScriptableObject editor)
+        public static void DrawScriptField(MonoScript monoScript, string content = "")
         {
             BeginPanel(GroupType.Vertical);
             GUI.enabled = false;
-            Type type = editor.GetType();
-            MonoScript monoScript = MonoScript.FromScriptableObject(editor);
-            if (monoScript != null)
-            {
-                _ = EditorGUILayout.ObjectField("Editor", monoScript, type, false);
-            }
-            else
-            {
-                EditorGUILayout.LabelField("No editor single file found", SpiralStyles.panel);
-            }
+            if (content == "") content = "Script";
+            EditorGUILayout.ObjectField(content, monoScript, typeof(MonoScript), false);
             GUI.enabled = true;
             EndPanel();
         }
 
-        public static void DrawEditorWindowScriptField(ScriptableObject editor)
+        public static void DrawScriptField(Type type, string content = "")
         {
             BeginPanel(GroupType.Vertical);
             GUI.enabled = false;
-            Type type = editor.GetType();
-            MonoScript monoScript = MonoScript.FromScriptableObject(editor);
-            if (monoScript != null)
-            {
-                _ = EditorGUILayout.ObjectField("Editor", monoScript, type, false);
-            }
-            else
-            {
-                EditorGUILayout.LabelField("No editor single file found", SpiralStyles.panel);
-            }
+            MonoScript monoScript = SpiralEditorTools.GetMonoScript(type);
+            if (content == "") content = "Script";
+            EditorGUILayout.ObjectField(content, monoScript, typeof(MonoScript), false);
             GUI.enabled = true;
             EndPanel();
+        }
+
+        public static void DrawScriptField(ScriptableObject scriptableObject, string content = "")
+        {
+            BeginPanel(GroupType.Vertical);
+            GUI.enabled = false;
+            Type type = scriptableObject.GetType();
+            MonoScript monoScript = MonoScript.FromScriptableObject(scriptableObject);
+            DrawScriptFieldOnly(monoScript, type, content);
+            GUI.enabled = true;
+            EndPanel();
+        }
+        #endregion
+
+        // Quick Object Field ---------------------------------------------------------------------
+        public static T DrawObjectField<T>(string content, T obj, bool allowScenePick = true) where T : UnityEngine.Object
+        {
+            Type type = typeof(T);
+            return (T)EditorGUILayout.ObjectField(content, obj, type, allowScenePick);
         }
 
         // Misc -----------------------------------------------------------------------------------
@@ -276,7 +288,7 @@ namespace Spiral.EditorToolkit
             Color defaultColor = GUI.color;
             GUI.color = color != null ? (Color)color : SpiralStyles.defaultLogoColor;
             EditorGUILayout.BeginVertical(SpiralStyles.panel);
-            EditorGUILayout.LabelField("SpiralBlack Scripts © 2020", SpiralStyles.logoLabel);
+            EditorGUILayout.LabelField("SpiralBlack Scripts © 2020", SpiralStyles.labelLogo);
             EditorGUILayout.EndVertical();
             GUI.color = defaultColor;
         }

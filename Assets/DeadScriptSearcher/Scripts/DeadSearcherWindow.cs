@@ -81,7 +81,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
             SpiralEditor.BeginPanel(GroupType.Vertical);
 
             SpiralEditor.BeginPanel(GroupType.Horizontal);
-            GUIStyle styleSceneIsDirty = new GUIStyle(SpiralStyles.boldLabel);
+            GUIStyle styleSceneIsDirty = new GUIStyle(SpiralStyles.labelBold);
             string sceneIsDirty = DeadScripts.isDirty ? 
                                   strSceneWasChanged : 
                                   strSceneClear;
@@ -93,7 +93,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
             EditorGUI.indentLevel += 1;
             foldoutSceneSearchHelp = EditorGUILayout.Foldout(foldoutSceneSearchHelp, 
                                                              strShowHelp, 
-                                                             true, SpiralStyles.foldout);
+                                                             true, SpiralStyles.foldoutNormal);
             EditorGUI.indentLevel -= 1;
             if (foldoutSceneSearchHelp)
             {
@@ -124,7 +124,7 @@ namespace Spiral.EditorToolkit.DeadScriptsSearcher
                 EditorGUI.indentLevel += 1;
                 foldoutDeads = EditorGUILayout.Foldout(foldoutDeads, 
                                                        strShowList, 
-                                                       true, SpiralStyles.foldout);
+                                                       true, SpiralStyles.foldoutNormal);
                 EditorGUI.indentLevel -= 1;
             }
             else

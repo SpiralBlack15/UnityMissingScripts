@@ -246,7 +246,7 @@ namespace Spiral.EditorToolkit
                         idxstr = idxstr.Replace("]", "");
                         int arrayNumber = Convert.ToInt32(idxstr);
                         IList collection = currentObject as IList; // C# Array всегда реализует IList
-                        if (collection.Count == 0) return null; // да, так тоже может быть в момент создания листа
+                        if (collection.Count == 0) return null;
                         if (collection.Count <= arrayNumber) return null; // ...или если мы расширяемся
                         currentObject = collection[arrayNumber]; // после чего идём дальше, там может быть и более глубокая вложенность
                     }

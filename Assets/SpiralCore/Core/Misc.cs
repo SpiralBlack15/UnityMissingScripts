@@ -55,7 +55,7 @@ namespace Spiral.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="ts"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this IList<T> ts) where T : class
+        public static List<T> Listed<T>(this IList<T> ts) where T : class
         {
             if (ts == null) return new List<T>();
             if (ts.Count == 0) return new List<T>();

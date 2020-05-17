@@ -11,24 +11,99 @@
 // SOFTWARE.
 // *********************************************************************************
 
+using Spiral.Core;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
 namespace Spiral.EditorToolkit
 {
-    public static class SpiralEditorTools 
+    public static class SpiralEditorTools
     {
-
-        /// <summary>
-        /// Просто убивает юньку вызовом чистой виртуальной функции :)
-        /// </summary>
-        public static void PressF()
+        private static List<string> assetsPaths;
+        
+        private static void ReloadAssets() // TODO: потом сделать с настройками
         {
-            UnityEngine.Diagnostics.Utils.ForceCrash(UnityEngine.Diagnostics.ForcedCrashCategory.PureVirtualFunction);
+            assetsPaths = AssetDatabase.GetAllAssetPaths().Listed();
         }
 
-        public static string GetGUID(string assetName)
+        static SpiralEditorTools() // при компиляции должно обновиться
+        {
+            ReloadAssets();
+        }
+
+        private static List<string> FindPaths(string filter)
+        {
+            var findings = assetsPaths.Where(x => x.Contains(filter));
+            return new List<string>(findings);
+        }
+
+        public static T GetSetializedObject<T>(this Editor editor, ref T target) where T : UnityEngine.Object
+        {
+            if (target == null) target = editor.serializedObject.targetObject as T;
+            return target;
+        }
+
+        public static T GetSerializedObject<T>(this SerializedObject serializedObject, ref T target) where T : UnityEngine.Object
+        {
+            if (target == null) target = serializedObject.targetObject as T;
+            return target;
+        }
+
+        public static MonoScript CashedMono<T>(ref MonoScript monoScript)
+        {
+            if (monoScript == null)
+            {
+                monoScript = GetMonoScript(typeof(T));
+            }
+            return monoScript;
+        }
+
+        public static MonoScript CashedMono(this PropertyDrawer propertyDrawer, ref MonoScript monoScript, bool drawerScript = false)
+        {
+            if (monoScript == null) 
+            {
+                UnityEngine.Debug.Log($"Get drawer script {propertyDrawer.GetType()}");
+                if (drawerScript)
+                {
+                    monoScript = GetMonoScript(propertyDrawer.GetType());
+                    if (monoScript == null)
+                    {
+                        Type targetType = propertyDrawer.fieldInfo.FieldType;
+                        monoScript = GetMonoScript(targetType);
+                    }
+                }
+                else
+                {
+                    Type targetType = propertyDrawer.fieldInfo.FieldType;
+                    monoScript = GetMonoScript(targetType);
+                }
+            }
+            return monoScript;
+        }
+
+        public static MonoScript CahsedMono<T>(ref MonoScript monoScript) // да, здесь действительно нужен ref
+        {
+            if (monoScript == null)
+            {
+                monoScript = GetMonoScript(typeof(T));
+            }
+            return monoScript;
+        }
+
+        public static MonoScript CashedMono(this UnityEngine.Object anyUnityObject, ref MonoScript monoScript)
+        {
+            if (monoScript == null) 
+            { 
+                monoScript = GetMonoScript(anyUnityObject.GetType()); 
+            }
+            return monoScript;
+        }
+
+        public static string GetGUIDUnity(string assetName)
         {
             string[] answer = AssetDatabase.FindAssets(assetName);
             if (answer.Length == 0) return "";
@@ -37,24 +112,39 @@ namespace Spiral.EditorToolkit
 
         public static string GetGUID(Type userType) // убедитесь, что имя класса сходится с именем ассета!
         {
-            string[] answer = AssetDatabase.FindAssets(userType.Name);
-            if (answer.Length == 0) return "";
-            else return answer[0];
+            string filter = $"{userType.Name}.cs";
+            List<string> names = FindPaths(filter);
+            switch (names.Count)
+            {
+                case 0: return "";
+                default:
+                    string firstPath = names[0];
+                    return AssetDatabase.AssetPathToGUID(firstPath);
+            }
         }
 
-        public static string GetAssetPath(Type userType)
+        public static string GetExactAssetPath(Type userType)
         {
-            string guid = GetGUID(userType);
-            if (guid == "") return "";
-            return AssetDatabase.GUIDToAssetPath(guid);
+            string filter = $"{userType.Name}.cs";
+            List<string> names = FindPaths(filter);
+            switch (names.Count)
+            {
+                case 0: return "";
+                default: return names[0];
+            }
         }
 
         public static MonoScript GetMonoScript(Type userType)
         {
-            string path = GetAssetPath(userType);
+            string path = GetExactAssetPath(userType);
             if (path == "") return null;
             MonoScript script = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
             return script;
+        }
+
+        public static void PressF()
+        {
+            UnityEngine.Diagnostics.Utils.ForceCrash(UnityEngine.Diagnostics.ForcedCrashCategory.FatalError);
         }
     }
 }

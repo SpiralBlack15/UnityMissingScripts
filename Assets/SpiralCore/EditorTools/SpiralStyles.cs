@@ -34,32 +34,43 @@ namespace Spiral.EditorToolkit
 
         // PANELS ---------------------------------------------------------------------------------
         public static GUIStyle panel { get; private set; }
-        public static GUIStyle indentedPanel { get; private set; }
+        public static GUIStyle panelIndented { get; private set; }
 
         // LABELS ---------------------------------------------------------------------------------
-        public static GUIStyle logoLabel { get; private set; }
-        public static GUIStyle smallLabel { get; private set; }
-        public static GUIStyle normalLabel { get; private set; }
-        public static GUIStyle boldLabel { get; private set; }
-        public static GUIStyle smallBoldLabel { get; private set; }
-        public static GUIStyle boxedBoldLabel { get; private set; }
-        public static GUIStyle smallBoxedLabel { get; private set; }
-        public static GUIStyle boxedBoldLabelCaption { get; private set; }
+        public static GUIStyle labelLogo { get; private set; }
+        public static GUIStyle labelSmall { get; private set; }
+        public static GUIStyle labelNormal { get; private set; }
+        public static GUIStyle labelBold { get; private set; }
+        public static GUIStyle labelSmallBold { get; private set; }
+        public static GUIStyle labelSmallBoxedBold { get; private set; }
+        public static GUIStyle labelSmallBoxed { get; private set; }
+        public static GUIStyle labelBoxedBoldCaption { get; private set; }
 
         // BUTTONS --------------------------------------------------------------------------------
         public static GUIStyle buttonNormal { get; private set; }
 
         // FOLDOUTS -------------------------------------------------------------------------------
-        public static GUIStyle foldout { get; private set; }
-        public static GUIStyle indentedFoldout { get; private set; }
-        public static GUIStyle indentedBoldFoldout { get; private set; }
+        public static GUIStyle foldoutNormal { get; private set; }
+        public static GUIStyle foldoutIndentedNormal { get; private set; }
+        public static GUIStyle foldoutIndentedBold { get; private set; }
+
+        public static GUIStyle foldoutPropertyNormal { get; private set; }
+        public static GUIStyle foldoutPropertyBold { get; private set; }
+        public static GUIStyle foldoutPropertySmall { get; private set; }
+        public static GUIStyle foldoutPropertySmallBold { get; private set; }
 
         // INDENTS --------------------------------------------------------------------------------
-        public static int indentedFoldoutLeftIndent { get; private set; } = 8;
-        public static int indentedPanelLeftIndent { get; private set; } = 12;
+        public static int indentFoldoutLeft { get; private set; } = 8;
+        public static int indentPropertyFoldoutLeft { get; private set; } = 10;
+        public static int indentPanelLeft { get; private set; } = 12;
+
+        // FONT SIZES -----------------------------------------------------------------------------
+        public static int fontSizeNormal { get; private set; } = 12;
+        public static int fontSizePopupNormal { get; private set; } = 11;
+        public static int fontSizeSmall { get; private set; } = 10;
 
         // POPUP ----------------------------------------------------------------------------------
-        public static GUIStyle miniPopupFont { get; private set; }
+        public static GUIStyle popupSmall { get; private set; }
 
         // INITIALIZE STYLES ======================================================================
         // Инициализирует все шорткаты, используемые выше
@@ -69,89 +80,114 @@ namespace Spiral.EditorToolkit
             // panels -----------------------------------------------------------------------------
             panel = new GUIStyle(EditorStyles.helpBox);
 
-            indentedPanel = new GUIStyle(panel);
-            indentedPanel.margin.left += indentedPanelLeftIndent;
+            panelIndented = new GUIStyle(panel);
+            panelIndented.margin.left += indentPanelLeft;
 
             // labels -----------------------------------------------------------------------------
-            smallLabel = new GUIStyle(EditorStyles.label)
+            labelSmall = new GUIStyle(EditorStyles.label)
             {
-                fontSize = 10,
+                fontSize = fontSizeSmall,
                 richText = true
             };
 
-            normalLabel = new GUIStyle(EditorStyles.label)
+            labelNormal = new GUIStyle(EditorStyles.label)
             {
-                fontSize = 12,
+                fontSize = fontSizeNormal,
                 richText = true
             };
 
-            boldLabel = new GUIStyle(EditorStyles.boldLabel)
+            labelBold = new GUIStyle(EditorStyles.boldLabel)
             {
-                fontSize = 12,
+                fontSize = fontSizeNormal,
                 richText = true
             };
 
-            smallBoldLabel = new GUIStyle(EditorStyles.boldLabel)
+            labelSmallBold = new GUIStyle(EditorStyles.boldLabel)
             {
-                fontSize = 10,
+                fontSize = fontSizeSmall,
                 richText = true
             };
 
-            boxedBoldLabel = new GUIStyle(panel)
-            {
-                fontStyle = FontStyle.Bold,
-                fontSize = 10,
-                richText = true
-            };
-
-            boxedBoldLabelCaption = new GUIStyle(panel)
+            labelSmallBoxedBold = new GUIStyle(panel)
             {
                 fontStyle = FontStyle.Bold,
-                fontSize = 12,
+                fontSize = fontSizeSmall,
                 richText = true
             };
 
-            smallBoxedLabel = new GUIStyle(panel)
+            labelBoxedBoldCaption = new GUIStyle(panel)
             {
-                fontSize = 10,
+                fontStyle = FontStyle.Bold,
+                fontSize = fontSizeNormal,
                 richText = true
             };
 
-            logoLabel = new GUIStyle(boxedBoldLabel);
-            logoLabel.normal.textColor = new Color(0.2f, 0.4f, 0.2f);
-            logoLabel.alignment = TextAnchor.MiddleRight;
+            labelSmallBoxed = new GUIStyle(panel)
+            {
+                fontSize = fontSizeSmall,
+                richText = true
+            };
+
+            labelLogo = new GUIStyle(labelSmallBoxedBold);
+            labelLogo.normal.textColor = new Color(0.2f, 0.4f, 0.2f);
+            labelLogo.alignment = TextAnchor.MiddleRight;
 
             // buttons ----------------------------------------------------------------------------
             buttonNormal = new GUIStyle(GUI.skin.button)
             {
-                fontSize = 12,
+                fontSize = fontSizeNormal,
                 richText = true
             };
 
             // foldouts ---------------------------------------------------------------------------
-            foldout = new GUIStyle(EditorStyles.foldout)
+            foldoutNormal = new GUIStyle(EditorStyles.foldout)
             {
-                fontSize = 12,
+                fontSize = fontSizeNormal,
                 richText = true
             };
 
-            indentedFoldout = new GUIStyle(foldout);
-            indentedFoldout.margin.left += indentedFoldoutLeftIndent;
+            foldoutIndentedNormal = new GUIStyle(foldoutNormal);
+            foldoutIndentedNormal.margin.left += indentFoldoutLeft;
 
-            indentedBoldFoldout = new GUIStyle(foldout)
+            foldoutIndentedBold = new GUIStyle(foldoutNormal)
             {
                 fontStyle = FontStyle.Bold,
             };
-            indentedBoldFoldout.margin.left += indentedFoldoutLeftIndent;
+            foldoutIndentedBold.margin.left += indentFoldoutLeft;
+
+            // foldout property -------------------------------------------------------------------
+            foldoutPropertyNormal = new GUIStyle(EditorStyles.foldout)
+            {
+                fontSize = fontSizeNormal,
+                richText = true
+            };
+            foldoutPropertyNormal.margin.left += indentPropertyFoldoutLeft;
+
+            foldoutPropertySmall = new GUIStyle(EditorStyles.foldout)
+            {
+                fontSize = fontSizeSmall,
+                richText = true
+            };
+            foldoutPropertySmall.margin.left += indentPropertyFoldoutLeft;
+
+            foldoutPropertyBold = new GUIStyle(foldoutPropertyNormal)
+            {
+                fontStyle = FontStyle.Bold
+            };
+
+            foldoutPropertySmallBold = new GUIStyle(foldoutPropertySmall)
+            {
+                fontStyle = FontStyle.Bold
+            };
 
             // popups -----------------------------------------------------------------------------
-            miniPopupFont = new GUIStyle(EditorStyles.popup)
+            popupSmall = new GUIStyle(EditorStyles.popup)
             {
-                fontSize = 11,
+                fontSize = fontSizePopupNormal,
                 richText = false // lol, we have troubles here
             };
 
-            // colors -----------------------------------------------------------------------------
+            // hex colors -------------------------------------------------------------------------
             hexDarkRed = SpiralEditor.GetColorHex(0.7f, 0.0f, 0.0f, 1.0f);
         }
     }

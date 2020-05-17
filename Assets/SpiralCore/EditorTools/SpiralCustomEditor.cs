@@ -17,7 +17,7 @@ using UnityEngine;
 using UnityEditor;
 namespace Spiral.EditorToolkit
 {
-    public class SpiralCustomEditor : Editor
+    public abstract class SpiralCustomEditor : Editor
     {
         protected Color colorDefault = Color.white;
 
@@ -35,7 +35,9 @@ namespace Spiral.EditorToolkit
             if (includeScript)
             {
                 SpiralEditor.DrawScriptField(serializedObject);
-                SpiralEditor.DrawEditorScriptField(this);
+
+                MonoScript editorMono = GetEditorMono();
+                if (editorMono != null) SpiralEditor.DrawScriptField(editorMono, "Editor");
             }
         }
 
@@ -43,6 +45,17 @@ namespace Spiral.EditorToolkit
         {
             SpiralEditor.EndPanel();
         }
+
+        protected static MonoScript CahsedMono<T>(ref MonoScript monoScript) // да, здесь действительно нужен ref
+        {
+            if (monoScript == null)
+            {
+                monoScript = SpiralEditorTools.GetMonoScript(typeof(T));
+            }
+            return monoScript;
+        }
+
+        protected abstract MonoScript GetEditorMono();
     }
 }
 #endif
